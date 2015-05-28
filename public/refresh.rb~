@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require 'cgi'
+require 'json'
+require_relative '../server-status'
+
+cgi = CGI.new('html5')
+
+$status = ServerStatus.new
+server_status = {}
+servers = []
+all_stats = false
+if cgi['server'].length > 0 then
+  servers << [cgi['server']]
+  all_stats = true
+else
+  servers << 'minecraft'
+  servers << 'starbound'
+  servers << 'kerbal'
+  servers << 'sevendays'
+  servers << 'mumble'
+end
+
+begin
+  servers.each do |type|
+    server_status[type] = {}
+    server_status[type]['online'] = try_method("#{type}_status")
+    server_status[type]['player count']  = try_method("#{type}_player_count")
+    if all_stats then
+      server_status[type]['motd'] = try_method("#{type}_motd")
+      server_status[type]['player list'] = try_method("#{type}_player_list")
+  end
+rescue
+
+end
+
+def try_method(method, *args)
+  if $server.respond_to? method then
+    $server.send(method, *args)
+  end
+end

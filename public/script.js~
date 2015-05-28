@@ -1,0 +1,52 @@
+function selectTab(tab) {
+    var tabs = document.getElementsByClassName("statusline");
+    for (var i = 0; i < tabs.length; i++) {
+	tabs[i].classList.remove("selected");
+    }
+    var activeTab = document.getElementById(tab + "-status");
+    activeTab.classList.add("selected");
+
+    var sections = document.getElementsByClassName("section");
+    for (var i = 0; i < sections.length; i++) {
+	sections[i].classList.remove("selected");
+    }
+    var activeSection = document.getElementById(tab + "-section");
+    activeSection.classList.add("selected");
+}
+
+function toggleMap() {
+    var mapElem = document.getElementById("map-frame");
+    var linkElem = document.getElementById("toggle-map");
+    if (mapElem.style.display == "block") {
+	mapElem.style.display = "none";
+	linkElem.innerHTML = "Show Map";
+    }
+    else {
+	mapElem.style.display = "block";
+	linkElem.innerHTML = "Hide Map";
+    }
+}
+
+function resize() {
+    var sections = document.getElementsByClassName("section");
+    var rect = sections[0].getBoundingClientRect();
+    var browserHeight = document.documentElement.clientHeight;
+    for (var i = 0; i < sections.length; i++) {
+	sections[i].style.height = (browserHeight - rect.top - 15) + "px";
+    }
+    var iframe = document.getElementById("map-frame");
+    var visibility = iframe.style.display;
+    iframe.style.display = "block";
+    var frameRect = iframe.getBoundingClientRect();
+    iframe.style.height = (sections[0].clientHeight - frameRect.top) + "px";
+    iframe.style.display = visibility;
+}
+
+document.addEventListener("DOMContentLoaded", function(event) {
+    selectTab("minecraft");
+    resize();
+});
+
+window.onresize = function(event) {
+    resize();
+};
