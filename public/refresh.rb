@@ -12,22 +12,24 @@ end
 
 cgi = CGI.new('html5')
 
-$status = ServerStatus.new
 server_status = {}
 servers = []
 all_stats = false
-if cgi['server'].length > 0 then
-  servers << cgi['server']
-  all_stats = true
-else
-  servers << 'minecraft'
-  servers << 'starbound'
-  servers << 'kerbal'
-  servers << 'sevendays'
-  servers << 'mumble'
-end
 
 begin
+  if cgi['server'].length > 0 then
+    servers << cgi['server']
+    all_stats = true
+    $status = ServerStatus.new(cgi['server'])
+  else
+    servers << 'minecraft'
+    servers << 'starbound'
+    servers << 'kerbal'
+    servers << 'sevendays'
+    servers << 'mumble'
+    $status = ServerStatus.new
+  end
+
   servers.each do |type|
     server_status[type] = {}
     server_status[type]['online'] = try_method("#{type}_status")
@@ -37,6 +39,8 @@ begin
       server_status[type]['player list'] = try_method("#{type}_player_list")
     end
   end
+
+# All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
 rescue
   server_status = {}
 end

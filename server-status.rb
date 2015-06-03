@@ -3,17 +3,21 @@ require 'json'
 require 'net/http'
 
 class ServerStatus
-  def initialize
-    reinitialize
+  def initialize(type = nil, skipQuery = nil)
+    reinitialize(type, skipQuery)
   end
 
-  def reinitialize
+  def reinitialize(type = nil, skipQuery = nil)
     @servers = {}
-    @servers[:minecraft] = MinecraftServer.new
-    @servers[:kerbal] = KerbalServer.new
-    @servers[:starbound] = StarboundServer.new
-    @servers[:sevendays] = SevenDays.new
-    @servers[:mumble] = MumbleServer.new
+    if type == nil then
+      @servers[:minecraft] = MinecraftServer.new(skipQuery)
+      @servers[:kerbal] = KerbalServer.new(skipQuery)
+      @servers[:starbound] = StarboundServer.new(skipQuery)
+      @servers[:sevendays] = SevendaysServer.new(skipQuery)
+      @servers[:mumble] = MumbleServer.new(skipQuery)
+    else
+      @servers[type.to_sym] = Object.const_get("#{type.capitalize}Server").new(skipQuery)
+    end
   end
 
   # Pass methods on to the individual server status objects
@@ -72,12 +76,13 @@ end
 #=== Minecraft ===
 
 class MinecraftServer
-  def initialize
+  def initialize(skipQuery = nil)
+    return if skipQuery
     @status = Query.simpleQuery('mc.bpeterman.com', 25765)
     if @status.kind_of? Exception then
       @status = nil
     end
-  end
+ end
 
   def status
     @status != nil
@@ -92,14 +97,19 @@ class MinecraftServer
   end
 
   def motd
-    @status[:motd]
+    if @status
+      @status[:motd]
+    else
+      ""
+    end
   end
 end
 
 #=== Kerbal Space Program ===
 
 class KerbalServer
-  def initialize
+  def initialize(skipQuery)
+    return if skipQuery
     begin
       @status = JSON.load(Net::HTTP.get('localhost', '/', 4300))
     rescue
@@ -127,7 +137,8 @@ end
 #=== Starbound ===
 
 class StarboundServer
-  def initialize
+  def initialize(skipQuery = nil)
+    return if skipQuery
     processes = `ps -C starbound_server`
     @status = (processes.split("\n")[1] != nil)
   end
@@ -139,8 +150,9 @@ end
 
 #=== 7 Days to Die ===
 
-class SevenDays
-  def initialize
+class SevendaysServer
+  def initialize(skipQuery = nil)
+    return if skipQuery
     processes = `ps -C 7DaysToDie.x86`
     @status = (processes.split("\n")[1] != nil)
   end
@@ -153,7 +165,8 @@ end
 #=== Mumble ===
 
 class MumbleServer
-  def initialize
+  def initialize(skipQuery = nil)
+    return if skipQuery
     @max_players = 20
 
     begin

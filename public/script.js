@@ -91,12 +91,22 @@ function refreshAll() {
     xmlhttp.onreadystatechange = (function(xmlobj, id) {
 	return function() { updateStatus(xmlobj, id); } })(xmlhttp, "");
     xmlhttp.send();
+    // Also refresh the details of the currently-selected tab
+    var selectedElem = document.querySelector(".statusline.selected");
+    if (selectedElem) {
+	var selected = selectedElem.id.split("-")[0];
+	xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET", "refresh.rb?server=" + selected, true);
+	xmlhttp.onreadystatechange = (function(xmlobj, id) {
+	    return function() { updateStatus(xmlobj, id); } })(xmlhttp, selected);
+	xmlhttp.send();
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {
     selectTab("minecraft");
     resize();
-    window.setInterval(function() { refreshAll(); }, 10000);
+    window.setInterval(function() { refreshAll(); }, 1000);
 });
 
 window.onresize = function(event) {

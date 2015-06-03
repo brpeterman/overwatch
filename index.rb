@@ -5,19 +5,22 @@ require_relative 'server-status'
 
 def build_html(sections)
   cgi = CGI.new('html5')
-  status = ServerStatus.new
+  status = ServerStatus.new(nil, true) # Don't send any queries yet. We'll do that asynchronously later
 
   tabs_html, sections_html = "", ""
   sections.each do |type, title|
     tabs_html += cgi.div({'id' => "#{type}-status",
                       'class' => 'statusline',
                       'onclick' => "selectTab('#{type}')"}) do
-      title + status.send("#{type}_status_text", cgi) +
-        ( status.respond_to?("#{type}_player_count") ?
-          cgi.span({'class' => 'player-count'}) do
-            "(" + status.send("#{type}_player_count") + ")"
-          end
-          : "" )
+      title +
+      cgi.span({'class' => 'status offline'}) do
+        "Loading"
+      end +
+      ( status.respond_to?("#{type}_player_count") ?
+        cgi.span({'class' => 'player-count'}) do
+          "(...)"
+        end
+        : "" )
     end
 
     sections_html += send("build_#{type}_section", cgi, status)
@@ -53,9 +56,7 @@ def build_minecraft_section(cgi, status)
             'class' => 'section'}) do
     details_section(cgi, 'minecraft') do
       details_line(cgi, "Address", "mc.bpeterman.com:25765", 'address') +
-      ( status.minecraft_status ?
-        details_line(cgi, "MOTD", status.minecraft_motd, 'motd')
-        : "" ) +
+      details_line(cgi, "MOTD", status.minecraft_motd, 'motd') +
       details_line(cgi, "Map",
                    cgi.a({'href' => 'http://mc.bpeterman.com:25766/'}) do
                      "http://mc.bpeterman.com:25766/"
@@ -85,12 +86,10 @@ def build_kerbal_section(cgi, status)
             'class' => 'section'}) do
     details_section(cgi, 'kerbal') do
       details_line(cgi, "Address", "overwatch.bpeterman.com", 'address') +
-      ( status.kerbal_status ?
-        details_line(cgi, "Players online", 
-                     ( status.kerbal_player_list != "" ?
-                       status.kerbal_player_list
-                       : "None" ), 'player_list')
-        : "" )
+      details_line(cgi, "Players online", 
+                   ( status.kerbal_player_list != "" ?
+                     status.kerbal_player_list
+                     : "None" ), 'player_list')
     end
   end
 end
@@ -109,12 +108,10 @@ def build_mumble_section(cgi, status)
             'class' => 'section'}) do
     details_section(cgi, 'mumble') do
       details_line(cgi, "Address", "mumble.bpeterman.com:64857", 'address') +
-      ( status.mumble_status ?
-        details_line(cgi, "Users online", 
-                     ( status.mumble_player_list != "" ?
-                       status.mumble_player_list
-                       : "None" ), 'player_list')
-        : "" )
+      details_line(cgi, "Users online", 
+                   ( status.mumble_player_list != "" ?
+                     status.mumble_player_list
+                     : "None" ), 'player_list')
     end
   end
 end
@@ -144,7 +141,7 @@ end
 sections = {}
 sections[:minecraft] = "Minecraft"
 sections[:starbound] = "Starbound"
-sections[:kerbal] = "Kerbal Space Program"
+#sections[:kerbal] = "Kerbal Space Program"
 sections[:sevendays] = "7 Days to Die"
 sections[:mumble] = "Mumble"
 
