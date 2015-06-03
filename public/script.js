@@ -1,3 +1,7 @@
+/*
+  Displays the section corresponding to the tab the user clicked on and hides whatever was active before.
+  Also refreshes the data displayed in the section.
+*/
 function selectTab(tab) {
     var tabs = document.getElementsByClassName("statusline");
     for (var i = 0; i < tabs.length; i++) {
@@ -21,6 +25,9 @@ function selectTab(tab) {
     xmlhttp.send();
 }
 
+/*
+  Show/hide the Minecraft map
+*/
 function toggleMap() {
     var mapElem = document.getElementById("map-frame");
     var linkElem = document.getElementById("toggle-map");
@@ -34,6 +41,9 @@ function toggleMap() {
     }
 }
 
+/*
+  Make sure everything is the right size
+*/
 function resize() {
     var sections = document.getElementsByClassName("section");
     var rect = sections[0].getBoundingClientRect();
@@ -43,6 +53,10 @@ function resize() {
     }
 }
 
+/*
+  XMLHHTPRequest handler.
+  Updates the status of whatever servers it knows about with the latest information.
+*/
 function updateStatus(xmlhttp, tab) {
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 	var status = JSON.parse(xmlhttp.responseText);
@@ -85,6 +99,9 @@ function updateStatus(xmlhttp, tab) {
     }
 }
 
+/*
+  Sends AJAX requests to update both the status tabs and the currently displayed section.
+*/
 function refreshAll() {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", "refresh.rb", true);
@@ -103,12 +120,18 @@ function refreshAll() {
     }
 }
 
+/*
+  Once we know the document is complete, select the first tab, make sure everything is sized correctly, and set up the refresh timer.
+*/
 document.addEventListener("DOMContentLoaded", function(event) {
     selectTab("minecraft");
     resize();
     window.setInterval(function() { refreshAll(); }, 1000);
 });
 
+/*
+  Make sure everything is sized correctly when there's a resize event
+*/
 window.onresize = function(event) {
     resize();
 };

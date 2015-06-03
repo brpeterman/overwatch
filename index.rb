@@ -3,10 +3,15 @@
 require 'cgi'
 require_relative 'server-status'
 
+# Builds all HTML
+# sections is a hash of server types to display
+#  :servertype => "Display Name"
 def build_html(sections)
   cgi = CGI.new('html5')
   status = ServerStatus.new(nil, true) # Don't send any queries yet. We'll do that asynchronously later
 
+  # Build the tabs that show server status
+  # Build the details section for each server
   tabs_html, sections_html = "", ""
   sections.each do |type, title|
     tabs_html += cgi.div({'id' => "#{type}-status",
@@ -26,6 +31,7 @@ def build_html(sections)
     sections_html += send("build_#{type}_section", cgi, status)
   end
 
+  # Output the HTML we just built
   cgi.out do
     cgi.html do
       cgi.head do
@@ -35,7 +41,7 @@ def build_html(sections)
           cgi.script({'type' => 'text/javascript',
                        'src' => 'script.js'}) +
           cgi.meta({'name' => 'viewport',
-                     'content' => 'width=device-width, initial-scale=1'})
+                     'content' => 'width=device-width, initial-scale=1'}) # Let mobile devices do their own scaling
       end +
       cgi.body do
         cgi.div({'id' => 'status-box'}) do
@@ -47,10 +53,14 @@ def build_html(sections)
   end
 end
 
+# Not used right now
 def build_general_section(cgi)
   
 end
 
+# Build HTML for Minecraft section
+# cgi is the CGI object we're using for output
+# status is the ServerStatus object
 def build_minecraft_section(cgi, status)
   cgi.div({'id' => 'minecraft-section',
             'class' => 'section'}) do
@@ -62,6 +72,7 @@ def build_minecraft_section(cgi, status)
                      "http://mc.bpeterman.com:25766/"
                    end, 'map')
     end + 
+    # Map IFrame
     cgi.div({'id' => 'map-container'}) do
       cgi.span({'id' => 'toggle-map',
                  'onclick' => 'toggleMap()'}) do
@@ -72,6 +83,9 @@ def build_minecraft_section(cgi, status)
   end
 end
 
+# Build HTML for Starbound section
+# cgi is the CGI object we're using for output
+# status is the ServerStatus object
 def build_starbound_section(cgi, status)
   cgi.div({'id' => 'starbound-section',
             'class' => 'section'}) do
@@ -81,6 +95,9 @@ def build_starbound_section(cgi, status)
   end
 end
 
+# Build HTML for the Kerbal Space Program section
+# cgi is the CGI object we're using for output
+# status is the ServerStatus object
 def build_kerbal_section(cgi, status)
   cgi.div({'id' => 'kerbal-section',
             'class' => 'section'}) do
@@ -94,6 +111,9 @@ def build_kerbal_section(cgi, status)
   end
 end
 
+# Build HTML for the 7 Days to Die section
+# cgi is the CGI object we're using for output
+# status is the ServerStatus object
 def build_sevendays_section(cgi, status)
   cgi.div({'id' => 'sevendays-section',
             'class' => 'section'}) do
@@ -103,6 +123,9 @@ def build_sevendays_section(cgi, status)
   end
 end
 
+# Build HTML for the Mumble section
+# cgi is the CGI object we're using for output
+# status is the ServerStatus object
 def build_mumble_section(cgi, status)
   cgi.div({'id' => 'mumble-section',
             'class' => 'section'}) do
@@ -116,6 +139,11 @@ def build_mumble_section(cgi, status)
   end
 end
 
+# Build HTML for a line of the details section
+# cgi is the CGI object we're using for output
+# label is the label displayed for the line
+# value is the value displayed for the line
+# type is the type of field. Used in the CSS class.
 def details_line(cgi, label, value, type)
   id = "#{type}-value"
   cgi.div({'class' => 'details-line'}) do
@@ -128,6 +156,10 @@ def details_line(cgi, label, value, type)
   end
 end
 
+# Build HTML for the server details section
+# cgi is the CGI object we're using for output
+# server_type is the type of server we're displaying (used in the element ID)
+# block is a block that evaluates to the content of the section
 def details_section(cgi, server_type, &block)
   cgi.div({'id' => (server_type + '-details'),
             'class' => 'details-section'}) do
@@ -138,6 +170,7 @@ def details_section(cgi, server_type, &block)
   end
 end
 
+# Establish which servers to show
 sections = {}
 sections[:minecraft] = "Minecraft"
 sections[:starbound] = "Starbound"
@@ -145,4 +178,5 @@ sections[:starbound] = "Starbound"
 sections[:sevendays] = "7 Days to Die"
 sections[:mumble] = "Mumble"
 
+# Output the page
 build_html(sections)

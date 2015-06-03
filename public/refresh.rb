@@ -4,6 +4,8 @@ require 'cgi'
 require 'json'
 require_relative '../server-status'
 
+# Tries to call a method on the server status object.
+# If the method doesn't exist, just return nil.
 def try_method(method, *args)
   if $status.respond_to? method then
     $status.send(method, *args)
@@ -17,11 +19,11 @@ servers = []
 all_stats = false
 
 begin
-  if cgi['server'].length > 0 then
+  if cgi['server'].length > 0 then # Loading a specific server's info
     servers << cgi['server']
     all_stats = true
     $status = ServerStatus.new(cgi['server'])
-  else
+  else # Loading the basic info for *all* servers
     servers << 'minecraft'
     servers << 'starbound'
     servers << 'kerbal'
@@ -34,7 +36,7 @@ begin
     server_status[type] = {}
     server_status[type]['online'] = try_method("#{type}_status")
     server_status[type]['player count']  = try_method("#{type}_player_count")
-    if all_stats then
+    if all_stats then # For individual servers, load a little more info
       server_status[type]['motd'] = try_method("#{type}_motd")
       server_status[type]['player list'] = try_method("#{type}_player_list")
     end

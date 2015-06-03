@@ -2,11 +2,16 @@ require_relative 'query'
 require 'json'
 require 'net/http'
 
+# All calls should go through this object. It provides methods to interact with the individual server types.
 class ServerStatus
+  # type is the type of server to initialize. If nil, we'll initialize every type we know.
+  # skipQuery indicates whether we should skip querying the server status
   def initialize(type = nil, skipQuery = nil)
     reinitialize(type, skipQuery)
   end
 
+  # type is the type of server to initialize. If nil, we'll initialize every type we know.
+  # skipQuery indicates whether we should skip querying the server status
   def reinitialize(type = nil, skipQuery = nil)
     @servers = {}
     if type == nil then
@@ -36,6 +41,7 @@ class ServerStatus
     end
   end
 
+  # Package a server's online status into a span element
   def status_text(server, cgi)
     if server.send("status") then
       cgi.span({'class' => 'status online'}) do
@@ -48,6 +54,7 @@ class ServerStatus
     end
   end
 
+  # Pass respond_to? calls on to the server objects
   def respond_to?(method_sym, include_private = false)
     server, method_name = parse_method(method_sym)
     if server then
@@ -57,6 +64,9 @@ class ServerStatus
     end
   end
 
+  # Check if a method call should be passed to one of our server status objects.
+  # returns [server, method_name], which is basically just the method passed in split on the first underscore.
+  # if we didn't find a server type that matches, returns nil
   def parse_method(method)
     if method =~ /\A([a-z]+?)_(.+)\Z/ then # {server_type}_{method}
       server_type = $1
