@@ -34,6 +34,7 @@ def build_html(sections)
   # Output the HTML we just built
   cgi.out do
     cgi.html do
+      "\n\n<!-- This HTML is auto-generated. Please don't judge me on the formatting. :) -->\n\n" +
       cgi.head do
         cgi.title { "Overwatch" } +
           cgi.link({'rel' => 'stylesheet',
@@ -41,7 +42,8 @@ def build_html(sections)
           cgi.script({'type' => 'text/javascript',
                        'src' => 'script.js'}) +
           cgi.meta({'name' => 'viewport',
-                     'content' => 'width=device-width, initial-scale=1'}) # Let mobile devices do their own scaling
+                     'content' => 'width=device-width, initial-scale=1'}) + # Let mobile devices do their own scaling
+          cgi.meta({'charset' => 'utf-8'})
       end +
       cgi.body do
         cgi.div({'id' => 'status-box'}) do
