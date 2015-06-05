@@ -4,13 +4,17 @@ require 'cgi'
 require 'json'
 require_relative '../server-status'
 
-# Make sure any kind of force termination releases the file lock
-Signal.trap("INT") { terminate }
+# Make sure any kind of forced termination releases the file lock
+# Conflicting information on the Internet says that Apache will send a TERM to processes that are timing out, but others say it's a KILL.
+# Since I can't catch a KILL, I'm hoping it's a TERM.
 Signal.trap("TERM") { terminate }
 def terminate
   $connected = false
-  File.open("../status.json", "r") do |file|
-    file.flock(FILE::LOCK_UN)
+  if $have_lock
+    File.open("../status.json", "r") do |file|
+      file.flock(FILE::LOCK_UN)
+      $have_lock = false
+    end
   end
 end
 
@@ -26,6 +30,7 @@ while $connected do
   begin
     File.open("../status.json", "r") do |file|
       file.flock(File::LOCK_SH) # block until file is available (shouldn't be long)
+      $have_lock = true
       # Check if there has been a change since we last read the status
       current_update = File.mtime(file.path)
       if current_update != last_update
@@ -36,6 +41,7 @@ while $connected do
         last_update = current_update
       end
       file.flock(File::LOCK_UN)
+      $have_lock = false
     end
     sleep 10
   rescue
