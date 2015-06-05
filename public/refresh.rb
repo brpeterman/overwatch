@@ -4,49 +4,42 @@ require 'cgi'
 require 'json'
 require_relative '../server-status'
 
-# Tries to call a method on the server status object.
-# If the method doesn't exist, just return nil.
-def try_method(method, *args)
-  if $status.respond_to? method then
-    $status.send(method, *args)
+# Make sure any kind of force termination releases the file lock
+Signal.trap("INT") { terminate }
+Signal.trap("TERM") { terminate }
+def terminate
+  $connected = false
+  File.open("../status.json", "r") do |file|
+    file.flock(FILE::LOCK_UN)
   end
 end
 
-cgi = CGI.new('html5')
+# Send headers to indicate that this is an event stream
+$stdout.print "Content-Type: text/event-stream\n"
+$stdout.print "Cache-Control: no-cache\n\n"
+$stdout.flush
 
-server_status = {}
-servers = []
-all_stats = false
-
-begin
-  if cgi['server'].length > 0 then # Loading a specific server's info
-    servers << cgi['server']
-    all_stats = true
-    $status = ServerStatus.new(cgi['server'])
-  else # Loading the basic info for *all* servers
-    servers << 'minecraft'
-    servers << 'starbound'
-    servers << 'kerbal'
-    servers << 'sevendays'
-    servers << 'mumble'
-    $status = ServerStatus.new
-  end
-
-  servers.each do |type|
-    server_status[type] = {}
-    server_status[type]['online'] = try_method("#{type}_status")
-    server_status[type]['player count']  = try_method("#{type}_player_count")
-    if all_stats then # For individual servers, load a little more info
-      server_status[type]['motd'] = try_method("#{type}_motd")
-      server_status[type]['player list'] = try_method("#{type}_player_list")
+# As long as there's a client, keep sending data  
+$connected = true
+last_update = nil
+while $connected do
+  begin
+    File.open("../status.json", "r") do |file|
+      file.flock(File::LOCK_SH) # block until file is available (shouldn't be long)
+      # Check if there has been a change since we last read the status
+      current_update = File.mtime(file.path)
+      if current_update != last_update
+        # There shouldn't be multiple lines, but if there are, make sure they send as part of the same data message
+        status_data = file.readlines.join "data: \n"
+        $stdout.print "data: #{status_data}\n\n"
+        $stdout.flush
+        last_update = current_update
+      end
+      file.flock(File::LOCK_UN)
     end
+    sleep 10
+  rescue
+    # If we fail to write to the stream, that means it's closed and we need to stop looping
+    $connected = false
   end
-
-# All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
-rescue
-  server_status = {}
-end
-
-cgi.out do
-  JSON.generate(server_status)
 end

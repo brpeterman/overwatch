@@ -1,6 +1,5 @@
 /*
   Displays the section corresponding to the tab the user clicked on and hides whatever was active before.
-  Also refreshes the data displayed in the section.
 */
 function selectTab(tab) {
     var tabs = document.getElementsByClassName("statusline");
@@ -16,13 +15,6 @@ function selectTab(tab) {
     }
     var activeSection = document.getElementById(tab + "-section");
     activeSection.classList.add("selected");
-
-    // Get the latest info for this tab
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", "refresh.rb?server=" + tab, true);
-    xmlhttp.onreadystatechange = (function(xmlobj, id) {
-	return function() { updateStatus(xmlobj, id); } })(xmlhttp, tab);
-    xmlhttp.send();
 }
 
 /*
@@ -54,45 +46,42 @@ function resize() {
 }
 
 /*
-  XMLHHTPRequest handler.
+  EventSource message handler
   Updates the status of whatever servers it knows about with the latest information.
 */
-function updateStatus(xmlhttp, tab) {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-	var status = JSON.parse(xmlhttp.responseText);
-	for (var key in status) {
-	    var tabElem = document.getElementById(key + "-status")
-	    if (tabElem) {
-		var statusElem = tabElem.querySelector(".status")
-		if (status[key]["online"]) {
-		    statusElem.classList.remove("offline");
-		    statusElem.classList.add("online");
-		    statusElem.innerHTML = "Online";
-		}
-		else {
-		    statusElem.classList.remove("online");
-		    statusElem.classList.add("offline");
-		    statusElem.innerHTML = "Offline";
-		}
-		var countElem = tabElem.querySelector(".player-count");
-		if (countElem) {
-		    countElem.innerHTML = "(" + status[key]["player count"] + ")";
-		}
+function updateStatus(e) {
+    if (!e.data) { return; }
+    var status = JSON.parse(e.data);
+    for (var key in status) {
+	var tabElem = document.getElementById(key + "-status")
+	if (tabElem) {
+	    var statusElem = tabElem.querySelector(".status")
+	    if (status[key]["online"]) {
+		statusElem.classList.remove("offline");
+		statusElem.classList.add("online");
+		statusElem.innerHTML = "Online";
+	    }
+	    else {
+		statusElem.classList.remove("online");
+		statusElem.classList.add("offline");
+		statusElem.innerHTML = "Offline";
+	    }
+	    var countElem = tabElem.querySelector(".player-count");
+	    if (countElem) {
+		countElem.innerHTML = "(" + status[key]["player count"] + ")";
 	    }
 	}
-	if (tab != "") {
-	    var serverStatus = status[tab];
-	    var sectionElem = document.getElementById(tab + "-section");
-	    if (sectionElem) {
-		for (var key in serverStatus) {
-		    var selector = "." + key.replace(' ', '_') + "-value";
-		    var valueElem = sectionElem.querySelector(selector);
-		    if (valueElem) {
-			if (key == "player list" && serverStatus[key] == "") {
-			    serverStatus[key] = "None";
-			}
-			valueElem.innerHTML = serverStatus[key];
+	var serverStatus = status[key];
+	var sectionElem = document.getElementById(key + "-section");
+	if (sectionElem) {
+	    for (var field in serverStatus) {
+		var selector = "." + field.replace(' ', '_') + "-value";
+		var valueElem = sectionElem.querySelector(selector);
+		if (valueElem) {
+		    if (field == "player list" && serverStatus[field] == "") {
+			serverStatus[field] = "None";
 		    }
+		    valueElem.innerHTML = serverStatus[field];
 		}
 	    }
 	}
@@ -100,33 +89,13 @@ function updateStatus(xmlhttp, tab) {
 }
 
 /*
-  Sends AJAX requests to update both the status tabs and the currently displayed section.
-*/
-function refreshAll() {
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", "refresh.rb", true);
-    xmlhttp.onreadystatechange = (function(xmlobj, id) {
-	return function() { updateStatus(xmlobj, id); } })(xmlhttp, "");
-    xmlhttp.send();
-    // Also refresh the details of the currently-selected tab
-    var selectedElem = document.querySelector(".statusline.selected");
-    if (selectedElem) {
-	var selected = selectedElem.id.split("-")[0];
-	xmlhttp = new XMLHttpRequest();
-	xmlhttp.open("GET", "refresh.rb?server=" + selected, true);
-	xmlhttp.onreadystatechange = (function(xmlobj, id) {
-	    return function() { updateStatus(xmlobj, id); } })(xmlhttp, selected);
-	xmlhttp.send();
-    }
-}
-
-/*
-  Once we know the document is complete, select the first tab, make sure everything is sized correctly, and set up the refresh timer.
+  Once we know the document is complete, select the first tab, make sure everything is sized correctly, and set up the refresh event.
 */
 document.addEventListener("DOMContentLoaded", function(event) {
     selectTab("minecraft");
     resize();
-    window.setInterval(function() { refreshAll(); }, 1000);
+    var evtSource = new EventSource("refresh.rb");
+    evtSource.onmessage = updateStatus;
 });
 
 /*

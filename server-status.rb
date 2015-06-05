@@ -43,7 +43,7 @@ class ServerStatus
 
   # Package a server's online status into a span element
   def status_text(server, cgi)
-    if server.send("status") then
+    if server.status then
       cgi.span({'class' => 'status online'}) do
         'Online'
       end
@@ -87,6 +87,10 @@ end
 
 class MinecraftServer
   def initialize(skipQuery = nil)
+    reinitialize(skipQuery)
+  end
+
+  def reinitialize(skipQuery = nil)
     return if skipQuery
     @status = Query.simpleQuery('mc.bpeterman.com', 25765)
     if @status.kind_of? Exception then
@@ -118,7 +122,11 @@ end
 #=== Kerbal Space Program ===
 
 class KerbalServer
-  def initialize(skipQuery)
+  def initialize(skipQuery = nil)
+    reinitialize(skipQuery)
+  end
+
+  def reinitialize(skipQuery = nil)
     return if skipQuery
     begin
       @status = JSON.load(Net::HTTP.get('localhost', '/', 4300))
@@ -140,7 +148,9 @@ class KerbalServer
   end
 
   def player_list
-    @status['players']
+    if @status
+      @status['players']
+    end
   end
 end
 
@@ -148,6 +158,10 @@ end
 
 class StarboundServer
   def initialize(skipQuery = nil)
+    reinitialize(skipQuery)
+  end
+
+  def reinitialize(skipQuery = nil)
     return if skipQuery
     processes = `ps -C starbound_server`
     @status = (processes.split("\n")[1] != nil)
@@ -162,6 +176,10 @@ end
 
 class SevendaysServer
   def initialize(skipQuery = nil)
+    reinitialize(skipQuery)
+  end
+
+  def reinitialize(skipQuery = nil)
     return if skipQuery
     processes = `ps -C 7DaysToDie.x86`
     @status = (processes.split("\n")[1] != nil)
@@ -176,6 +194,10 @@ end
 
 class MumbleServer
   def initialize(skipQuery = nil)
+    reinitialize(skipQuery)
+  end
+
+  def reinitialize(skipQuery = nil)
     return if skipQuery
     @max_players = 20
 
