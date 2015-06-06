@@ -2,6 +2,7 @@
 
 require 'cgi'
 require 'json'
+require 'fileutils'
 require_relative '../server-status'
 
 # Make sure any kind of forced termination releases the file lock
@@ -28,6 +29,9 @@ $connected = true
 last_update = nil
 while $connected do
   begin
+    # Notify the daemon that we're interested in an update
+    FileUtils.touch '../tickler', :mtime => Time.now
+
     File.open("../status.json", "r") do |file|
       file.flock(File::LOCK_SH) # block until file is available (shouldn't be long)
       $have_lock = true
@@ -43,7 +47,7 @@ while $connected do
       file.flock(File::LOCK_UN)
       $have_lock = false
     end
-    sleep 10
+    sleep 30 # The client doesn't need to update more than once every 30 seconds
   rescue
     # If we fail to write to the stream, that means it's closed and we need to stop looping
     $connected = false
