@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+#TODO: Build infrastructure to sleep and wake up on demand, keep track of when we were last asked to wake up
+
 require_relative 'server-status'
 require 'json'
 
@@ -37,33 +39,37 @@ $status = ServerStatus.new(nil, true)
 $do_query = true
 
 while $do_query do
-  begin
-    servers.each do |type|
-      break unless $do_query
-      $status.send("#{type}_reinitialize") # re-ping the server
-      server_status[type] = {}
-      server_status[type]['online'] = try_method("#{type}_status")
-      server_status[type]['player count']  = try_method("#{type}_player_count")
-      server_status[type]['motd'] = try_method("#{type}_motd")
-      server_status[type]['player list'] = try_method("#{type}_player_list")
+  # Check if anybody actually wants an update
+  last_request = File.mtime('tickler')
+  if Time.now.to_i - last_request.to_i < 10*60
+    begin
+      servers.each do |type|
+        break unless $do_query
+        $status.send("#{type}_reinitialize") # re-ping the server
+        server_status[type] = {}
+        server_status[type]['online'] = try_method("#{type}_status")
+        server_status[type]['player count']  = try_method("#{type}_player_count")
+        server_status[type]['motd'] = try_method("#{type}_motd")
+        server_status[type]['player list'] = try_method("#{type}_player_list")
+      end
+
+      # All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
+    rescue Exception => e
+      $stderr.puts e.inspect
+      $stderr.puts e.backtrace
+      server_status = {}
     end
 
-    # All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
-  rescue Exception => e
-    $stderr.puts e.inspect
-    $stderr.puts e.backtrace
-    server_status = {}
-  end
-
-  latest_status = JSON.generate(server_status)
-  if latest_status != previous_status then
-    # write an update
-    File.open("status.json", "w") do |file|
-      file.flock(File::LOCK_EX) # block until we have the lock
-      file.print latest_status
-      file.flock(File::LOCK_UN)
+    latest_status = JSON.generate(server_status)
+    if latest_status != previous_status then
+      # write an update
+      File.open("status.json", "w") do |file|
+        file.flock(File::LOCK_EX) # block until we have the lock
+        file.print latest_status
+        file.flock(File::LOCK_UN)
+      end
+      previous_status = latest_status
     end
-    previous_status = latest_status
   end
 
   # Hacky way to sleep for a while but still terminate reasonably fast after getting a signal
