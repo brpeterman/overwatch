@@ -41,7 +41,7 @@ $do_query = true
 while $do_query do
   # Check if anybody actually wants an update
   last_request = File.mtime('tickler')
-  if Time.now.to_i - last_request.to_i < 10*60
+  if Time.now.to_i - last_request.to_i < 5*60
     begin
       servers.each do |type|
         break unless $do_query
@@ -73,7 +73,7 @@ while $do_query do
   end
 
   # Hacky way to sleep for a while but still terminate reasonably fast after getting a signal
-  30.times do
+  10.times do
     break unless $do_query
     sleep 1
   end

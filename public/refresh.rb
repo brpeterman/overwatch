@@ -30,7 +30,7 @@ last_update = nil
 while $connected do
   begin
     # Notify the daemon that we're interested in an update
-    FileUtils.touch '../tickler', :mtime => Time.now
+    FileUtils.touch "../tickler"
 
     File.open("../status.json", "r") do |file|
       file.flock(File::LOCK_SH) # block until file is available (shouldn't be long)
@@ -47,9 +47,11 @@ while $connected do
       file.flock(File::LOCK_UN)
       $have_lock = false
     end
-    sleep 30 # The client doesn't need to update more than once every 30 seconds
-  rescue
+    sleep 10
+  rescue Exception => e
     # If we fail to write to the stream, that means it's closed and we need to stop looping
+    $stderr.puts e.inspect
+    $stderr.puts e.backtrace
     $connected = false
   end
 end
