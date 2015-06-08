@@ -149,7 +149,9 @@ class KerbalServer
 
   def player_list
     if @status
-      @status['players']
+      @status['players'].split /,\w*/
+    else
+      []
     end
   end
 end
@@ -216,15 +218,15 @@ class MumbleServer
 
   def player_list
     if @status != nil then
-      channel_tree_users(@status["root"]).join ', '
+      channel_tree_users(@status["root"])
     else
-      ""
+      []
     end
   end
 
   # Recursively build a list of all users in the channel tree starting at 'channel'
   def channel_tree_users(channel)
-    users = channel["users"].map {|user| user["name"]}
+    users = channel["users"].map {|user| MumbleUser.new(user)}
     channel["channels"].each do |subchannel|
       users = users | channel_tree_users(subchannel)
     end
@@ -237,6 +239,38 @@ class MumbleServer
       "#{users.count}/#{@max_players}"
     else
       "0/0"
+    end
+  end
+end
+
+class MumbleUser
+  def initialize(user_data)
+    # Drop each of the hash values into an instance variable
+    user_data.each { |name, value| instance_variable_set("@#{name}", value) }
+  end
+
+  def to_s
+    @name
+  end
+
+  def widget(cgi)
+    cgi.div({'class' => 'mumble-user',
+              'id' => "mumble-user-#{@name}"}) do
+      cgi.div({'class' => 'mumble-user-name'}) do
+        @name
+      end +
+      cgi.div({'class' => 'mumble-user-data'}) do
+        ( @mute or @selfMute ?
+          cgi.div({'class' => 'mumble-user-mute'}) do
+
+          end
+          : "" ) +
+        ( @deaf or @selfDeaf ?
+          cgi.div({'class' => 'mumble-user-deaf'}) do
+
+          end
+          : "")
+      end
     end
   end
 end
