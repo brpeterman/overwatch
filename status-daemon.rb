@@ -37,11 +37,16 @@ servers << 'mumble'
 $status = ServerStatus.new(nil, true)
 
 $do_query = true
+last_state = :sleep
+state = :sleep
 
 while $do_query do
   # Check if anybody actually wants an update
   last_request = File.mtime('tickler')
-  if Time.now.to_i - last_request.to_i < 5*60
+  if Time.now.to_i - last_request.to_i < 2*60
+    last_state = state
+    state = :awake
+    $stderr.puts "[#{Time.now}] Sending queries"
     begin
       servers.each do |type|
         break unless $do_query
@@ -70,6 +75,13 @@ while $do_query do
       end
       previous_status = latest_status
     end
+  else
+    last_state = state
+    state = :sleep
+  end
+
+  if state != last_state and state == :sleep
+    $stderr.puts "[#{Time.now}] Going to sleep"
   end
 
   # Hacky way to sleep for a while but still terminate reasonably fast after getting a signal
