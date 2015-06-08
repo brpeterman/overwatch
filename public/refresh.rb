@@ -52,6 +52,6 @@ while $connected do
     # If we fail to write to the stream, that means it's closed and we need to stop looping
     $stderr.puts e.inspect
     $stderr.puts e.backtrace
-    $connected = false
+    terminate
   end
 end
