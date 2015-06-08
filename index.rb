@@ -106,8 +106,8 @@ def build_kerbal_section(cgi, status)
     details_section(cgi, 'kerbal') do
       details_line(cgi, "Address", "overwatch.bpeterman.com", 'address') +
       details_line(cgi, "Players online", 
-                   ( status.kerbal_player_list != "" ?
-                     status.kerbal_player_list
+                   ( status.kerbal_player_list ?
+                     status.kerbal_player_list.join(', ')
                      : "None" ), 'player_list')
     end
   end
@@ -134,8 +134,8 @@ def build_mumble_section(cgi, status)
     details_section(cgi, 'mumble') do
       details_line(cgi, "Address", "mumble.bpeterman.com:64857", 'address') +
       details_line(cgi, "Users online", 
-                   ( status.mumble_player_list != "" ?
-                     status.mumble_player_list
+                   ( status.mumble_player_list ?
+                     status.mumble_player_list.join(', ')
                      : "None" ), 'player_list')
     end
   end
