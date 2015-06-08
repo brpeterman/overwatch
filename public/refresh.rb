@@ -39,7 +39,7 @@ while $connected do
       current_update = File.mtime(file.path)
       if current_update != last_update
         # There shouldn't be multiple lines, but if there are, make sure they send as part of the same data message
-        status_data = file.readlines.join "data: \n"
+        status_data = file.readlines.join "\ndata: "
         $stdout.print "data: #{status_data}\n\n"
         $stdout.flush
         last_update = current_update
