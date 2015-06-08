@@ -33,7 +33,7 @@ def build_html(sections)
 
   # Output the HTML we just built
   cgi.out do
-    cgi.html do
+    CGI::pretty(cgi.html do
       "\n\n<!-- This HTML is auto-generated. Please don't judge me on the formatting. :) -->\n\n" +
       cgi.head do
         cgi.title { "Overwatch" } +
@@ -51,7 +51,7 @@ def build_html(sections)
         end +
         sections_html
       end
-    end
+    end)
   end
 end
 
