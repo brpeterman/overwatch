@@ -262,7 +262,7 @@ class MumbleUser
       cgi.div({'class' => 'mumble-user-data'}) do
         ( @mute or @selfMute ?
           cgi.div({'class' => 'mumble-user-mute'}) do
-
+            
           end
           : "" ) +
         ( @deaf or @selfDeaf ?
@@ -272,5 +272,15 @@ class MumbleUser
           : "")
       end
     end
+  end
+
+  # For comparison purposes, two MumbleUser objects with the same name should be treated as equal
+  # This is important for the array union operator
+  def eql?(other)
+    @name == other.name
+  end
+
+  def hash
+    @name.hash
   end
 end
