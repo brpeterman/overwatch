@@ -21,25 +21,35 @@ iframe#map-frame {
 .statusline {
     display: inline-block;
     padding: 6px;
-    background-color: #606060;
+    background-color: #484040;
     color: #d0d0d0;
     cursor: pointer;
     font-weight: bold;
-    border: 1px solid #000000;
-    border-bottom: 0px;
     flex: 1;
-    text-align: center;
+    text-align: left;
     min-width: 175px;
 }
 
+.status-summary {
+    display: inline-block;
+    text-align: right;
+    float: right;
+}
+
 .statusline:hover {
-    background-color: #60a0e0;
+    background-color: #807070;
     color: #ffffff;
 }
 
 .statusline.selected {
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.1));
     background-color: #ffffff;
     color: #000000;
+}
+
+.statusline:not(.selected) {
+    /* This inset shadow adds a little bit of definition to the section's edges */
+    box-shadow: inset -2px -2px 20px 1px rgba(0, 0, 0, 0.2);
 }
 
 .statusline span.online, .statusline span.offline {
@@ -64,6 +74,14 @@ iframe#map-frame {
     color: #ff0000;
 }
 
+.statusline:hover span.offline {
+    color: #a00000;
+}
+
+.statusline.selected span.offline {
+    color: #a00000;
+}
+
 .statusline span.player-count {
     font-weight: normal;
 }
@@ -72,10 +90,10 @@ iframe#map-frame {
     display: none;
     flex-direction: column;
     padding: 4px;
-    border: 1px solid #000000;
+    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
     background-color: #ffffff;
-    background: linear-gradient(#ffffff, #b0b0b0);
     position: relative;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
 
 .section > div {
@@ -100,14 +118,21 @@ iframe#map-frame {
 }
 
 #toggle-map {
+    font-weight: 600;
     cursor: pointer;
+    color: #000000;
+}
+
+#toggle-map:hover {
+    color: #605050;
 }
 
 .details-section {
     max-width: 500px;
-    border: 1px solid #303030;
     background-color: #f0f0f0;
-    padding: 3px;
+    padding: 10px;
+    margin-bottom: 3px;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
 
 .details-section .header {

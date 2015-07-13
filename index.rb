@@ -18,14 +18,16 @@ def build_html(sections)
                       'class' => 'statusline',
                       'onclick' => "selectTab('#{type}')"}) do
       title +
-      cgi.span({'class' => 'status offline'}) do
-        "Loading"
-      end +
       ( status.respond_to?("#{type}_player_count") ?
         cgi.span({'class' => 'player-count'}) do
           "(...)"
         end
-        : "" )
+        : "" ) +
+      cgi.div({'class' => 'status-summary'}) do
+        cgi.span({'class' => 'status offline'}) do
+          "Loading"
+        end
+      end
     end
 
     sections_html += send("build_#{type}_section", cgi, status)
@@ -192,8 +194,8 @@ end
 sections = {}
 sections[:minecraft] = "Minecraft"
 sections[:terraria] = "Terraria"
-#sections[:starbound] = "Starbound"
-#sections[:kerbal] = "Kerbal Space Program"
+sections[:starbound] = "Starbound"
+sections[:kerbal] = "Kerbal Space Program"
 sections[:sevendays] = "7 Days to Die"
 sections[:mumble] = "Mumble"
 
