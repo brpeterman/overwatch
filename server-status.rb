@@ -301,7 +301,7 @@ class TerrariaServer
 
   def player_list
     if @status
-      @status['players']
+      @status['players'].split(', ')
     end
   end
 
