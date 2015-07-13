@@ -78,8 +78,13 @@ function updateStatus(e) {
 		var selector = "." + field.replace(' ', '_') + "-value";
 		var valueElem = sectionElem.querySelector(selector);
 		if (valueElem) {
-		    if (field == "player list" && serverStatus[field] == "") {
-			serverStatus[field] = "None";
+		    if (field == "player list") {
+			if (serverStatus[field] == "") {
+			    serverStatus[field] = "None";
+			}
+			else {
+			    serverStatus[field] = serverStatus[field].join(', ');
+			}
 		    }
 		    valueElem.innerHTML = serverStatus[field];
 		}
