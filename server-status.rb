@@ -5,23 +5,31 @@ require 'net/http'
 # All calls should go through this object. It provides methods to interact with the individual server types.
 class ServerStatus
   # type is the type of server to initialize. If nil, we'll initialize every type we know.
-  # skipQuery indicates whether we should skip querying the server status
-  def initialize(type = nil, skipQuery = nil)
-    reinitialize(type, skipQuery)
+  # skip_query indicates whether we should skip querying the server status
+  def initialize(type = nil, skip_query = nil)
+    reinitialize(type, skip_query)
   end
 
   # type is the type of server to initialize. If nil, we'll initialize every type we know.
-  # skipQuery indicates whether we should skip querying the server status
-  def reinitialize(type = nil, skipQuery = nil)
+  # skip_query indicates whether we should skip querying the server status
+  def reinitialize(type = nil, skip_query = nil)
+    # Read configuration
+    config = {}
+    dir = File.dirname(__FILE__)
+    File.open("#{dir}/config.json", "r") do |file|
+      config = JSON.load(file.readlines.join "\n")
+    end
+
     @servers = {}
     if type == nil then
-      @servers[:minecraft] = MinecraftServer.new(skipQuery)
-      @servers[:kerbal] = KerbalServer.new(skipQuery)
-      @servers[:starbound] = StarboundServer.new(skipQuery)
-      @servers[:sevendays] = SevendaysServer.new(skipQuery)
-      @servers[:mumble] = MumbleServer.new(skipQuery)
+      @servers[:minecraft] = MinecraftServer.new(config, skip_query)
+      @servers[:kerbal] = KerbalServer.new(config, skip_query)
+      @servers[:starbound] = StarboundServer.new(config, skip_query)
+      @servers[:sevendays] = SevendaysServer.new(config, skip_query)
+      @servers[:mumble] = MumbleServer.new(config, skip_query)
+      @servers[:terraria] = TerrariaServer.new(config, skip_query)
     else
-      @servers[type.to_sym] = Object.const_get("#{type.capitalize}Server").new(skipQuery)
+      @servers[type.to_sym] = Object.const_get("#{type.capitalize}Server").new(config, skip_query)
     end
   end
 
@@ -86,13 +94,15 @@ end
 #=== Minecraft ===
 
 class MinecraftServer
-  def initialize(skipQuery = nil)
-    reinitialize(skipQuery)
+  def initialize(config = nil, skip_query = nil)
+    reinitialize(config, skip_query)
   end
 
-  def reinitialize(skipQuery = nil)
-    return if skipQuery
-    @status = Query.simpleQuery('mc.bpeterman.com', 25765)
+  def reinitialize(config = nil, skip_query = nil)
+    @config = config["minecraft"] if config
+
+    return if skip_query
+    @status = Query.simpleQuery(@config['serveraddr'], @config['serverport'])
     if @status.kind_of? Exception then
       @status = nil
     end
@@ -117,19 +127,25 @@ class MinecraftServer
       ""
     end
   end
+
+  def address
+    "#{@config['serveraddr']}:#{@config['serverport']}"
+  end
 end
 
 #=== Kerbal Space Program ===
 
 class KerbalServer
-  def initialize(skipQuery = nil)
-    reinitialize(skipQuery)
+  def initialize(config = nil, skip_query = nil)
+    reinitialize(config, skip_query)
   end
 
-  def reinitialize(skipQuery = nil)
-    return if skipQuery
+  def reinitialize(config = nil, skip_query = nil)
+    @config = config["kerbal"] if config
+
+    return if skip_query
     begin
-      @status = JSON.load(Net::HTTP.get('localhost', '/', 4300))
+      @status = JSON.load(Net::HTTP.get(@config['queryaddr'], @config['querystring'], @config['queryport']))
     rescue
       @status = nil
     end
@@ -154,17 +170,23 @@ class KerbalServer
       []
     end
   end
+
+  def address
+    @config['serveraddr']
+  end
 end
 
 #=== Starbound ===
 
 class StarboundServer
-  def initialize(skipQuery = nil)
-    reinitialize(skipQuery)
+  def initialize(config = nil, skip_query = nil)
+    reinitialize(config, skip_query)
   end
 
-  def reinitialize(skipQuery = nil)
-    return if skipQuery
+  def reinitialize(config = nil, skip_query = nil)
+    @config = config["starbound"] if config
+
+    return if skip_query
     processes = `ps -C starbound_server`
     @status = (processes.split("\n")[1] != nil)
   end
@@ -172,17 +194,23 @@ class StarboundServer
   def status
     @status
   end
+
+  def address
+    @config['serveraddr']
+  end
 end
 
 #=== 7 Days to Die ===
 
 class SevendaysServer
-  def initialize(skipQuery = nil)
-    reinitialize(skipQuery)
+  def initialize(config = nil, skip_query = nil)
+    reinitialize(config, skip_query)
   end
 
-  def reinitialize(skipQuery = nil)
-    return if skipQuery
+  def reinitialize(config = nil, skip_query = nil)
+    @config = config["sevendays"] if config
+
+    return if skip_query
     processes = `ps -C 7DaysToDie.x86`
     @status = (processes.split("\n")[1] != nil)
   end
@@ -190,21 +218,27 @@ class SevendaysServer
   def status
     @status
   end
+
+  def address
+    "#{@config['serveraddr']}:#{@config['serverport']}"
+  end
 end
 
 #=== Mumble ===
 
 class MumbleServer
-  def initialize(skipQuery = nil)
-    reinitialize(skipQuery)
+  def initialize(config = nil, skip_query = nil)
+    reinitialize(config, skip_query)
   end
 
-  def reinitialize(skipQuery = nil)
-    return if skipQuery
+  def reinitialize(config = nil, skip_query = nil)
+    @config = config["mumble"] if config
+
+    return if skip_query
     @max_players = 20
 
     begin
-      @status = JSON.load(Net::HTTP.get('bpeterman.com', '/mumble/?view=json&serverId=1', 80))
+      @status = JSON.load(Net::HTTP.get(@config['queryaddr'], @config['querystring'], @config['queryport']))
       if @status.count == 0 then
         @status = nil # Mumble server down and CVP server down should look the same
       end
@@ -240,6 +274,56 @@ class MumbleServer
     else
       "0/0"
     end
+  end
+
+  def address
+    "#{@config['serveraddr']}:#{@config['serverport']}"
+  end
+end
+
+#=== Terraria ===
+
+class TerrariaServer
+  def initialize(config = nil, skip_query = nil)
+    reinitialize(config, skip_query)
+  end
+
+  def reinitialize(config = nil, skip_query = nil)
+    @config = config["terraria"] if config
+
+    return if skip_query
+    update_terraria_status
+  end
+
+  def status
+    @status != nil
+  end
+
+  def player_list
+    if @status
+      @status['players']
+    end
+  end
+
+  def player_count
+    if @status
+      "#{@status['playercount']}/8"
+    else
+      "0/0"
+    end
+  end
+
+  def update_terraria_status
+    uri = URI("http://#{@config['queryaddr']}:#{@config['queryport']}/status")
+    begin
+      @status = JSON.load(Net::HTTP.get(uri))
+    rescue Exception => e # error = server down
+      $stderr.puts "Error: #{e.inspect}"
+    end
+  end
+
+  def address
+    "#{@config['serveraddr']}:#{@config['serverport']}"
   end
 end
 

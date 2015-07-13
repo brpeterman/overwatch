@@ -34,6 +34,7 @@ servers << 'starbound'
 servers << 'kerbal'
 servers << 'sevendays'
 servers << 'mumble'
+servers << 'terraria'
 $status = ServerStatus.new(nil, true)
 
 $do_query = true

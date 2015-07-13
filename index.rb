@@ -67,7 +67,7 @@ def build_minecraft_section(cgi, status)
   cgi.div({'id' => 'minecraft-section',
             'class' => 'section'}) do
     details_section(cgi, 'minecraft') do
-      details_line(cgi, "Address", "mc.bpeterman.com:25765", 'address') +
+      details_line(cgi, "Address", status.minecraft_address, 'address') +
       details_line(cgi, "MOTD", status.minecraft_motd, 'motd') +
       details_line(cgi, "Map",
                    cgi.a({'href' => 'http://mc.bpeterman.com:25766/'}) do
@@ -92,7 +92,7 @@ def build_starbound_section(cgi, status)
   cgi.div({'id' => 'starbound-section',
             'class' => 'section'}) do
     details_section(cgi, 'starbound') do
-      details_line(cgi, "Address", "overwatch.bpeterman.com", 'address')
+      details_line(cgi, "Address", status.starbound_address, 'address')
     end
   end
 end
@@ -104,7 +104,7 @@ def build_kerbal_section(cgi, status)
   cgi.div({'id' => 'kerbal-section',
             'class' => 'section'}) do
     details_section(cgi, 'kerbal') do
-      details_line(cgi, "Address", "overwatch.bpeterman.com", 'address') +
+      details_line(cgi, "Address", status.kerbal_address, 'address') +
       details_line(cgi, "Players online", 
                    ( status.kerbal_player_list ?
                      status.kerbal_player_list.join(', ')
@@ -120,7 +120,7 @@ def build_sevendays_section(cgi, status)
   cgi.div({'id' => 'sevendays-section',
             'class' => 'section'}) do
     details_section(cgi, 'sevendays') do
-      details_line(cgi, "Address", "overwatch.bpeterman.com:25000", 'address')
+      details_line(cgi, "Address", status.sevendays_address, 'address')
     end
   end
 end
@@ -132,10 +132,26 @@ def build_mumble_section(cgi, status)
   cgi.div({'id' => 'mumble-section',
             'class' => 'section'}) do
     details_section(cgi, 'mumble') do
-      details_line(cgi, "Address", "mumble.bpeterman.com:64857", 'address') +
+      details_line(cgi, "Address", status.mumble_address, 'address') +
       details_line(cgi, "Users online", 
                    ( status.mumble_player_list ?
                      status.mumble_player_list.join(', ')
+                     : "None" ), 'player_list')
+    end
+  end
+end
+
+# Build HTML for the Terraria section
+# cgi is the CGI object we're using for output
+# status is the ServerStatus object
+def build_terraria_section(cgi, status)
+  cgi.div({'id' => 'terraria-section',
+            'class' => 'section'}) do
+    details_section(cgi, 'terraria') do
+      details_line(cgi, "Address", status.terraria_address, 'address') +
+      details_line(cgi, "Users online", 
+                   ( status.terraria_player_list ?
+                     status.terraria_player_list.join(', ')
                      : "None" ), 'player_list')
     end
   end
@@ -175,7 +191,8 @@ end
 # Establish which servers to show
 sections = {}
 sections[:minecraft] = "Minecraft"
-sections[:starbound] = "Starbound"
+sections[:terraria] = "Terraria"
+#sections[:starbound] = "Starbound"
 #sections[:kerbal] = "Kerbal Space Program"
 sections[:sevendays] = "7 Days to Die"
 sections[:mumble] = "Mumble"
