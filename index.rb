@@ -8,7 +8,7 @@ require_relative 'server-status'
 #  :servertype => "Display Name"
 def build_html(sections)
   cgi = CGI.new('html5')
-  status = ServerStatus.new(nil, true) # Don't send any queries yet. We'll do that asynchronously later
+  status = Overwatch::ServerStatus.new(nil, true) # Don't send any queries yet. We'll do that asynchronously later
 
   # Build the tabs that show server status
   # Build the details section for each server
