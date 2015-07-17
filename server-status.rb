@@ -399,27 +399,6 @@ module Overwatch
       @name
     end
 
-    def widget(cgi)
-      cgi.div({'class' => 'mumble-user',
-                'id' => "mumble-user-#{@name}"}) do
-        cgi.div({'class' => 'mumble-user-name'}) do
-          @name
-        end +
-          cgi.div({'class' => 'mumble-user-data'}) do
-          ( @mute or @selfMute ?
-            cgi.div({'class' => 'mumble-user-mute'}) do
-              
-            end
-            : "" ) +
-            ( @deaf or @selfDeaf ?
-              cgi.div({'class' => 'mumble-user-deaf'}) do
-
-              end
-              : "")
-        end
-      end
-    end
-
     # For comparison purposes, two MumbleUser objects with the same name should be treated as equal
     # This is important for the array union operator
     def eql?(other)
