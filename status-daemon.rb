@@ -23,13 +23,16 @@ end
 
 module Overwatch
 
+  ##
+  # This class queries all the servers it knows about for their current status.
   class StatusDaemon
     attr_reader :status, :last_update
 
+    ##
+    # Initialize the object. No surprises here.
     def initialize
       @status = {}
       @last_update = nil
-      @last_request = Time.now
       @server_status = Overwatch::ServerStatus.new nil, true
 
       populate_servers
@@ -42,12 +45,17 @@ module Overwatch
       @servers << 'terraria'
     end
 
+    ##
+    # Populate @servers from the config file.
+    # For details about the config file, see Overwatch::ServerStatus.
     def populate_servers
       File.open('config.json', 'r') do |file|
         @servers = JSON.load(file.readlines.join "\n").keys.map {|k| k }
       end
     end
+    private :populate_servers
 
+    ##
     # Tries to call a method on the server status object.
     # If the method doesn't exist, just return nil.
     def try_method(method, *args)
@@ -55,7 +63,10 @@ module Overwatch
         @server_status.send(method, *args)
       end
     end
+    private :try_method
 
+    ##
+    # Query the servers for their status
     def update_status
       begin
         $stderr.puts "[#{Time.now}] Sending queries"
@@ -75,7 +86,11 @@ module Overwatch
         @status = {}
       end
     end
+    private :update_status
 
+    ##
+    # Get the latest status.
+    # Status may be up to 10 seconds old.
     def status
       # If the data is over 10 seconds old, refresh it
       if !@last_update or (Time.now.to_i - @last_update.to_i > 10)
