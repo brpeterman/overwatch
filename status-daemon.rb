@@ -32,6 +32,7 @@ module Overwatch
       @last_request = Time.now
       @server_status = Overwatch::ServerStatus.new nil, true
 
+      populate_servers
       @servers = []
       @servers << 'minecraft'
       @servers << 'starbound'
@@ -39,6 +40,12 @@ module Overwatch
       @servers << 'sevendays'
       @servers << 'mumble'
       @servers << 'terraria'
+    end
+
+    def populate_servers
+      File.open('config.json', 'r') do |file|
+        @servers = JSON.load(file.readlines.join "\n").keys.map {|k| k }
+      end
     end
 
     # Tries to call a method on the server status object.
