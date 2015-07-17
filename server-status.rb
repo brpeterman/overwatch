@@ -184,7 +184,6 @@ module Overwatch
         ""
       end
     end
-
   end
 
   #=== Kerbal Space Program ===
@@ -226,10 +225,6 @@ module Overwatch
         []
       end
     end
-
-    def address
-      @config['serveraddr']
-    end
   end
 
   #=== Starbound ===
@@ -261,6 +256,8 @@ module Overwatch
   #=== 7 Days to Die ===
 
   class SevendaysServer
+    include Overwatch::ServerShared
+
     def initialize(config = nil, skip_query = nil)
       reinitialize(config, skip_query)
     end
@@ -275,10 +272,6 @@ module Overwatch
 
     def status
       @status
-    end
-
-    def address
-      "#{@config['serveraddr']}:#{@config['serverport']}"
     end
   end
 
@@ -335,10 +328,6 @@ module Overwatch
         "0/0"
       end
     end
-
-    def address
-      "#{@config['serveraddr']}:#{@config['serverport']}"
-    end
   end
 
   #=== Terraria ===
@@ -382,10 +371,6 @@ module Overwatch
       rescue Exception => e # error = server down
         $stderr.puts "Error: #{e.inspect}"
       end
-    end
-
-    def address
-      "#{@config['serveraddr']}:#{@config['serverport']}"
     end
   end
 
