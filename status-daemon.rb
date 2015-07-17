@@ -3,6 +3,7 @@
 require_relative 'server-status'
 require 'json'
 require 'drb/drb'
+require 'thread'
 
 # Allow Ctrl+C and SIGTERM to trigger an exit
 Signal.trap("INT") { terminate }
@@ -34,6 +35,7 @@ module Overwatch
       @status = {}
       @last_update = nil
       @server_status = Overwatch::ServerStatus.new nil, true
+      @mutex = Mutex.new
 
       populate_servers
       @servers = []
@@ -93,9 +95,11 @@ module Overwatch
     # Status may be up to 10 seconds old.
     def status
       # If the data is over 10 seconds old, refresh it
-      if !@last_update or (Time.now.to_i - @last_update.to_i > 10)
-        update_status
-        @last_update = Time.now
+      @mutex.synchronize do
+        if !@last_update or (Time.now.to_i - @last_update.to_i > 10)
+          update_status
+          @last_update = Time.now
+        end
       end
       @status
     end
