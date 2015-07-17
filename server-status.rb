@@ -3,7 +3,22 @@ require 'json'
 require 'net/http'
 
 module Overwatch
-  # All calls should go through this object. It provides methods to interact with the individual server types.
+  ##
+  # This class provides access to details about the various servers that run
+  # on Overwatch.
+  #
+  # Servers are configured in config.json, which has the following format:
+  # config := { server, server2, ... }
+  # server := {
+  #            "serveraddr":  address that players connect to,
+  #            "serverport":  port that players connect to,
+  #            "queryaddr":   address to query for status,
+  #            "queryport":   port to query for status,
+  #            "querystring": resource on queryaddr to request to get status
+  #            }
+  #
+  # Only the keys which are required for the specific server implementation
+  # need to be populated.
   class ServerStatus
     # type is the type of server to initialize. If nil, we'll initialize every type we know.
     # skip_query indicates whether we should skip querying the server status
@@ -92,9 +107,50 @@ module Overwatch
     end
   end
 
+  #=== Shared methods ===
+  # Methods in this module are the same regardless of the specific server implementation.
+  # This module is a mixin for the classes below.
+  module ServerShared
+    self.instance_eval do
+      attr_reader :config
+    end
+
+    @server_type = self.class.to_s.sub('Server', '').downcase
+
+    def method_midding(name, *args, &block)
+      if name =~ /\Aconfig_(\w+)\Z/
+        if !self.config
+          return nil
+        end
+        if self.config[$1]
+          self.config[$1]
+        else
+          super
+        end
+      else
+        super
+      end
+    end
+
+    def address
+      if !self.config
+        return ""
+      end
+
+      if self.config['serverport']
+        "#{self.config['serveraddr']}:#{self.config['serverport']}"
+      else
+        self.config['serveraddr']
+      end
+    end
+  end
+
+
   #=== Minecraft ===
 
   class MinecraftServer
+    include Overwatch::ServerShared
+
     def initialize(config = nil, skip_query = nil)
       reinitialize(config, skip_query)
     end
@@ -129,14 +185,13 @@ module Overwatch
       end
     end
 
-    def address
-      "#{@config['serveraddr']}:#{@config['serverport']}"
-    end
   end
 
   #=== Kerbal Space Program ===
 
   class KerbalServer
+    include Overwatch::ServerShared
+
     def initialize(config = nil, skip_query = nil)
       reinitialize(config, skip_query)
     end
@@ -180,6 +235,8 @@ module Overwatch
   #=== Starbound ===
 
   class StarboundServer
+    include Overwatch::ServerShared
+
     def initialize(config = nil, skip_query = nil)
       reinitialize(config, skip_query)
     end
@@ -228,6 +285,8 @@ module Overwatch
   #=== Mumble ===
 
   class MumbleServer
+    include Overwatch::ServerShared
+
     def initialize(config = nil, skip_query = nil)
       reinitialize(config, skip_query)
     end
@@ -285,6 +344,8 @@ module Overwatch
   #=== Terraria ===
 
   class TerrariaServer
+    include Overwatch::ServerShared
+
     def initialize(config = nil, skip_query = nil)
       reinitialize(config, skip_query)
     end
