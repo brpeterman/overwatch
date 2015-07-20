@@ -52,7 +52,7 @@ module Overwatch
     # For details about the config file, see Overwatch::ServerStatus.
     def populate_servers
       File.open('config.json', 'r') do |file|
-        @servers = JSON.load(file.readlines.join "\n").keys.map {|k| k }
+        @servers = JSON.load(file.readlines.join "\n").keys
       end
     end
     private :populate_servers
