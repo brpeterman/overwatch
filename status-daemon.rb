@@ -38,13 +38,6 @@ module Overwatch
       @mutex = Mutex.new
 
       populate_servers
-      @servers = []
-      @servers << 'minecraft'
-      @servers << 'starbound'
-      @servers << 'kerbal'
-      @servers << 'sevendays'
-      @servers << 'mumble'
-      @servers << 'terraria'
     end
 
     ##
