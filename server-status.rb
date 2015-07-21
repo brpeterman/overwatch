@@ -92,9 +92,7 @@ module Overwatch
     # returns [server, method_name], which is basically just the method passed in split on the first underscore.
     # if we didn't find a server type that matches, returns nil
     def parse_method(method)
-      if method =~ /\A([a-z]+?)_(.+)\Z/ then # {server_type}_{method}
-        server_type = $1
-        method_name = $2
+      if /\A(?<server_type>[a-z]+?)_(?<method_name>.+)\Z/ =~ method then # {server_type}_{method}
         server = @servers[server_type.to_sym]
         if !server then
           nil
