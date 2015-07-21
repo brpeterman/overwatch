@@ -27,12 +27,16 @@ def build_sections_html(cgi, status, sections)
     tabs_html += cgi.div('id' => "#{type}-status",
                          'class' => 'statusline',
                          'onclick' => "selectTab('#{type}')") do
-      title +
-      ( status.respond_to?("#{type}_player_count") ?
-        cgi.span('class' => 'player-count') do
-          "(...)"
+      cgi.div('class' => 'status-title') do
+        title +
+        if status.respond_to?("#{type}_player_count")
+          cgi.span('class' => 'player-count') do
+            "(...)"
+          end
+        else
+          ""
         end
-        : "" ) +
+      end +
       cgi.div('class' => 'status-summary') do
         cgi.span('class' => 'status offline') do
           "Loading"
@@ -42,6 +46,7 @@ def build_sections_html(cgi, status, sections)
 
     sections_html += send("build_#{type}_section", cgi, status)
   end
+
   [tabs_html, sections_html]
 end
 
@@ -58,10 +63,19 @@ def build_wrapping_html(cgi, tabs_html, sections_html)
       cgi.meta('charset' => 'utf-8')
     end +
     cgi.body do
-      cgi.div('id' => 'status-box') do
-        tabs_html
-      end +
-      sections_html
+      cgi.div('id' => 'main-container') do
+        cgi.div('id' => 'tabs') do
+          cgi.div('id' => 'status-box') do
+            tabs_html
+          end +
+          cgi.div('id' => 'show-hide-tabs') do
+            "Hide tabs"
+          end
+        end +
+        cgi.div('id' => 'sections') do
+          sections_html
+        end
+      end
     end
   end
 end
@@ -119,9 +133,11 @@ def build_kerbal_section(cgi, status)
     details_section(cgi, 'kerbal') do
       details_line(cgi, "Address", status.kerbal_address, 'address') +
       details_line(cgi, "Players online", 
-                   ( status.kerbal_player_list ?
+                   if status.kerbal_player_list
                      status.kerbal_player_list.join(', ')
-                     : "None" ), 'player_list')
+                   else
+                     "None"
+                   end, 'player_list')
     end
   end
 end
@@ -147,9 +163,11 @@ def build_mumble_section(cgi, status)
     details_section(cgi, 'mumble') do
       details_line(cgi, "Address", status.mumble_address, 'address') +
       details_line(cgi, "Users online", 
-                   ( status.mumble_player_list ?
+                   if status.mumble_player_list
                      status.mumble_player_list.join(', ')
-                     : "None" ), 'player_list')
+                   else
+                     "None"
+                   end, 'player_list')
     end
   end
 end
@@ -163,9 +181,11 @@ def build_terraria_section(cgi, status)
     details_section(cgi, 'terraria') do
       details_line(cgi, "Address", status.terraria_address, 'address') +
       details_line(cgi, "Users online", 
-                   ( status.terraria_player_list ?
+                   if status.terraria_player_list
                      status.terraria_player_list.join(', ')
-                     : "None" ), 'player_list')
+                   else
+                     "None"
+                   end, 'player_list')
     end
   end
 end
