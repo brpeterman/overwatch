@@ -117,32 +117,6 @@ module Overwatch
 
     @server_type = self.class.to_s.sub('Server', '').downcase
 
-    def method_missing(name, *args, &block)
-      config_val = get_config(name)
-      if config_val
-        config_val
-      else
-        super
-      end
-    end
-
-    def respond_to?(name, include_private = false)
-      if get_config(name)
-        true
-      else
-        super
-      end
-    end
-
-    def get_config(name)
-      if !self.config
-        nil
-      elsif name =~ /\Aconfig_(\w+)\Z/
-        self.config[$1]
-      end
-    end
-    private :get_config
-
     def address
       if !self.config
         return ""
