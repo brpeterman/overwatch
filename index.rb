@@ -74,11 +74,10 @@ end
 # [status] ServerStatus object
 # [sections] Hash of sections to display.
 def build_tabs_html(cgi, status, sections)
-  tabs_html = ""
-  sections.each do |type, title|
-    tabs_html += cgi.div('id' => "#{type}-status",
-                         'class' => 'statusline',
-                         'onclick' => "selectTab('#{type}')") do
+  sections.reduce("") do |html, (type, title)|
+    html += cgi.div('id' => "#{type}-status",
+                    'class' => 'statusline',
+                    'onclick' => "selectTab('#{type}')") do
       cgi.div('class' => 'status-title') do
         title +
           if status.respond_to?("#{type}_player_count")
@@ -96,8 +95,6 @@ def build_tabs_html(cgi, status, sections)
       end
     end
   end
-
-  tabs_html
 end
 
 ##
@@ -106,12 +103,9 @@ end
 # [status] ServerStatus object
 # [sections] Hash of sections to display.
 def build_sections_html(cgi, status, sections)
-  sections_html = ""
-  sections.each do |type, _|
-    sections_html += send("build_#{type}_section", cgi, status)
+  sections.keys.reduce("") do |html, type|
+    html += send("build_#{type}_section", cgi, status)
   end
-
-  sections_html
 end
 
 # Not used right now
