@@ -9,7 +9,7 @@ require_relative 'server-status'
 #            :servertype => "Display Name"
 def output_html(sections)
   cgi = CGI.new('html5')
-  status = Overwatch::ServerStatus.new(nil, true) # Don't send any queries yet. We'll do that asynchronously later
+  status = Overwatch::ServerStatus.new(skip_query: true) # Don't send any queries yet. We'll do that asynchronously later
 
   cgi.out do
     CGI::pretty(build_html(cgi, status, sections))

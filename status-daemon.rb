@@ -34,7 +34,7 @@ module Overwatch
     def initialize
       @status = {}
       @last_update = nil
-      @server_status = Overwatch::ServerStatus.new nil, true
+      @server_status = Overwatch::ServerStatus.new skip_query: true
       @mutex = Mutex.new
 
       populate_servers

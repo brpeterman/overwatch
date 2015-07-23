@@ -22,13 +22,13 @@ module Overwatch
   class ServerStatus
     # type is the type of server to initialize. If nil, we'll initialize every type we know.
     # skip_query indicates whether we should skip querying the server status
-    def initialize(type = nil, skip_query = nil)
-      reinitialize(type, skip_query)
+    def initialize(type: nil, skip_query: nil)
+      reinitialize(type: type, skip_query: skip_query)
     end
 
     # type is the type of server to initialize. If nil, we'll initialize every type we know.
     # skip_query indicates whether we should skip querying the server status
-    def reinitialize(type = nil, skip_query = nil)
+    def reinitialize(type: nil, skip_query: nil)
       # Read configuration
       config = {}
       dir = File.dirname(__FILE__)
@@ -38,14 +38,14 @@ module Overwatch
 
       @servers = {}
       if type == nil then
-        @servers[:minecraft] = MinecraftServer.new(config, skip_query)
-        @servers[:kerbal] = KerbalServer.new(config, skip_query)
-        @servers[:starbound] = StarboundServer.new(config, skip_query)
-        @servers[:sevendays] = SevendaysServer.new(config, skip_query)
-        @servers[:mumble] = MumbleServer.new(config, skip_query)
-        @servers[:terraria] = TerrariaServer.new(config, skip_query)
+        @servers[:minecraft] = MinecraftServer.new(config, skip_query: skip_query)
+        @servers[:kerbal] = KerbalServer.new(config, skip_query: skip_query)
+        @servers[:starbound] = StarboundServer.new(config, skip_query: skip_query)
+        @servers[:sevendays] = SevendaysServer.new(config, skip_query: skip_query)
+        @servers[:mumble] = MumbleServer.new(config, skip_query: skip_query)
+        @servers[:terraria] = TerrariaServer.new(config, skip_query: skip_query)
       else
-        @servers[type.to_sym] = Object.const_get("#{type.capitalize}Server").new(config, skip_query)
+        @servers[type.to_sym] = Object.const_get("#{type.capitalize}Server").new(config, skip_query: skip_query)
       end
     end
 
@@ -134,11 +134,11 @@ module Overwatch
   class MinecraftServer
     include Overwatch::ServerShared
 
-    def initialize(config = nil, skip_query = nil)
-      reinitialize(config, skip_query)
+    def initialize(config = nil, skip_query: nil)
+      reinitialize(config, skip_query: skip_query)
     end
 
-    def reinitialize(config = nil, skip_query = nil)
+    def reinitialize(config = nil, skip_query: nil)
       @config = config["minecraft"] if config
 
       return if skip_query
@@ -174,11 +174,11 @@ module Overwatch
   class KerbalServer
     include Overwatch::ServerShared
 
-    def initialize(config = nil, skip_query = nil)
-      reinitialize(config, skip_query)
+    def initialize(config = nil, skip_query: nil)
+      reinitialize(config, skip_query: skip_query)
     end
 
-    def reinitialize(config = nil, skip_query = nil)
+    def reinitialize(config = nil, skip_query: nil)
       @config = config["kerbal"] if config
 
       return if skip_query
@@ -215,11 +215,11 @@ module Overwatch
   class StarboundServer
     include Overwatch::ServerShared
 
-    def initialize(config = nil, skip_query = nil)
-      reinitialize(config, skip_query)
+    def initialize(config = nil, skip_query: nil)
+      reinitialize(config, skip_query: skip_query)
     end
 
-    def reinitialize(config = nil, skip_query = nil)
+    def reinitialize(config = nil, skip_query: nil)
       @config = config["starbound"] if config
 
       return if skip_query
@@ -241,11 +241,11 @@ module Overwatch
   class SevendaysServer
     include Overwatch::ServerShared
 
-    def initialize(config = nil, skip_query = nil)
-      reinitialize(config, skip_query)
+    def initialize(config = nil, skip_query: nil)
+      reinitialize(config, skip_query: skip_query)
     end
 
-    def reinitialize(config = nil, skip_query = nil)
+    def reinitialize(config = nil, skip_query: nil)
       @config = config["sevendays"] if config
 
       return if skip_query
@@ -263,11 +263,11 @@ module Overwatch
   class MumbleServer
     include Overwatch::ServerShared
 
-    def initialize(config = nil, skip_query = nil)
-      reinitialize(config, skip_query)
+    def initialize(config = nil, skip_query: nil)
+      reinitialize(config, skip_query: skip_query)
     end
 
-    def reinitialize(config = nil, skip_query = nil)
+    def reinitialize(config = nil, skip_query: nil)
       @config = config["mumble"] if config
 
       return if skip_query
@@ -318,11 +318,11 @@ module Overwatch
   class TerrariaServer
     include Overwatch::ServerShared
 
-    def initialize(config = nil, skip_query = nil)
-      reinitialize(config, skip_query)
+    def initialize(config = nil, skip_query: nil)
+      reinitialize(config, skip_query: skip_query)
     end
 
-    def reinitialize(config = nil, skip_query = nil)
+    def reinitialize(config = nil, skip_query: nil)
       @config = config["terraria"] if config
 
       return if skip_query
