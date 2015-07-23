@@ -22,13 +22,13 @@ module Overwatch
   class ServerStatus
     # type is the type of server to initialize. If nil, we'll initialize every type we know.
     # skip_query indicates whether we should skip querying the server status
-    def initialize(type: nil, skip_query: nil)
-      reinitialize(type: type, skip_query: skip_query)
+    def initialize(type = nil, skip_query: nil)
+      reinitialize(type, skip_query: skip_query)
     end
 
     # type is the type of server to initialize. If nil, we'll initialize every type we know.
     # skip_query indicates whether we should skip querying the server status
-    def reinitialize(type: nil, skip_query: nil)
+    def reinitialize(type = nil, skip_query: nil)
       # Read configuration
       config = {}
       dir = File.dirname(__FILE__)
