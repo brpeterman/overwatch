@@ -26,7 +26,6 @@ module Overwatch
           def self.registered_servers; @@registered_servers end
         end
         @@registered_servers[server_type.to_sym] = classname
-        warn "#{server_type}: #{classname}"
       end
     end
   end
