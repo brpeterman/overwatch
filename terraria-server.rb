@@ -45,7 +45,5 @@ module Overwatch
         $stderr.puts "Error: #{e.inspect}"
       end
     end
-
-    Overwatch::ServerShared::register_server(:terraria, self.name)
   end
 end

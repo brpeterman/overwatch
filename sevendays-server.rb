@@ -21,7 +21,5 @@ module Overwatch
     def status
       @status
     end
-
-    Overwatch::ServerShared::register_server(:sevendays, self.name)
   end
 end

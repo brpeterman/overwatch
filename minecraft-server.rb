@@ -40,7 +40,5 @@ module Overwatch
         ""
       end
     end
-
-    Overwatch::ServerShared::register_server(:minecraft, self.name)
   end
 end

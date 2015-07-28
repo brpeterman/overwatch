@@ -56,8 +56,6 @@ module Overwatch
         "0/0"
       end
     end
-
-    Overwatch::ServerShared::register_server(:mumble, self.name)
   end
 
   class MumbleUser

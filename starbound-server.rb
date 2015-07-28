@@ -25,7 +25,5 @@ module Overwatch
     def address
       @config['serveraddr']
     end
-
-    Overwatch::ServerShared::register_server(:starbound, self.name)
   end
 end

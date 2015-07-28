@@ -42,7 +42,5 @@ module Overwatch
         []
       end
     end
-
-    Overwatch::ServerShared::register_server(:kerbal, self.name)
   end
 end
