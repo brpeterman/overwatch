@@ -6,8 +6,8 @@ require 'drb/drb'
 require 'thread'
 
 # Allow Ctrl+C and SIGTERM to trigger an exit
-Signal.trap("INT") { terminate }
-Signal.trap("TERM") { terminate }
+Signal.trap("INT") { terminate! }
+Signal.trap("TERM") { terminate! }
 
 def run!
   uri = 'druby://localhost:8787'
@@ -17,7 +17,7 @@ def run!
   DRb.thread.join if DRb.thread
 end
 
-def terminate
+def terminate!
   DRb.stop_service
 end
 
