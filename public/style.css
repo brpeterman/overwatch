@@ -19,10 +19,12 @@ iframe#map-frame {
 }
 
 #tabs {
-    min-width: 350px;
+    min-width: 320px;
+    max-height: 50vh;
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 #show-hide-tabs {
