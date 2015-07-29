@@ -4,17 +4,70 @@ require_relative 'server-status'
 require 'json'
 require 'drb/drb'
 require 'thread'
+require 'sys/proctable'
 
 # Allow Ctrl+C and SIGTERM to trigger an exit
 Signal.trap("INT") { terminate! }
 Signal.trap("TERM") { terminate! }
 
 def run!
-  uri = 'druby://localhost:8787'
-  $daemon = Overwatch::StatusDaemon.new
-  
-  DRb.start_service(uri, $daemon)
-  DRb.thread.join if DRb.thread
+  if ARGV.empty?
+    show_help
+  else
+    command = ARGV.first.downcase
+    if command.downcase == "start"
+      try_start_daemon
+    
+    elsif command == "stop"
+      try_stop_daemon
+    end
+  end
+end
+
+def show_help
+  puts "Usage:"
+  puts "  status-daemon.rb COMMAND"
+  puts ""
+  puts "Commands:"
+  puts "  start - start the daemon"
+  puts "  stop  - stop the daemon"
+end
+
+def try_start_daemon
+  if daemon_process
+    warn "The daemon is already running."
+  else
+    $daemon = Overwatch::StatusDaemon.new
+    server_uri = 'druby://localhost:8787'
+    
+    puts "Starting daemon"
+    job = fork do
+      DRb.start_service(server_uri, $daemon)
+      DRb.thread.join if DRb.thread
+    end
+    Process.detach job
+  end
+end
+
+def try_stop_daemon
+  pid = daemon_process
+  if !pid
+    warn "The daemon is not running."
+  else
+    puts "Stopping daemon"
+    Process.kill "TERM", pid
+  end
+end
+
+def daemon_process
+  pid = nil
+  Sys::ProcTable.ps do |process|
+    if process.cmdline =~ /#{__FILE__}/ and process.pid != Process.pid
+      pid = process.pid
+      break
+    end
+  end
+  pid
 end
 
 def terminate!
@@ -64,7 +117,6 @@ module Overwatch
     # Query the servers for their status
     def update_status
       begin
-        $stderr.puts "[#{Time.now}] Sending queries"
         @servers.each do |type|
           @server_status.send("#{type}_reinitialize") # re-ping the server
           @status[type] = {}
@@ -76,8 +128,8 @@ module Overwatch
 
         # All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
       rescue Exception => e
-        $stderr.puts e.inspect
-        $stderr.puts e.backtrace
+        warn e.inspect
+        warn e.backtrace
         @status = {}
       end
     end
