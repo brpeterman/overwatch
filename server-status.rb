@@ -1,10 +1,10 @@
 require 'json'
-require_relative 'minecraft-server'
-require_relative 'kerbal-server'
-require_relative 'sevendays-server'
-require_relative 'terraria-server'
-require_relative 'starbound-server'
-require_relative 'mumble-server'
+require_relative 'server-classes/minecraft-server'
+require_relative 'server-classes/kerbal-server'
+require_relative 'server-classes/sevendays-server'
+require_relative 'server-classes/terraria-server'
+require_relative 'server-classes/starbound-server'
+require_relative 'server-classes/mumble-server'
 
 module Overwatch
   ##
