@@ -10,6 +10,8 @@ require 'sys/proctable'
 Signal.trap("INT") { terminate! }
 Signal.trap("TERM") { terminate! }
 
+##
+# Process command line parameters.
 def run!
   if ARGV.empty?
     show_help
@@ -20,10 +22,15 @@ def run!
     
     elsif command == "stop"
       try_stop_daemon
+
+    else
+      show_help
     end
   end
 end
 
+##
+# Output some instructions.
 def show_help
   puts "Usage:"
   puts "  status-daemon.rb COMMAND"
@@ -33,6 +40,8 @@ def show_help
   puts "  stop  - stop the daemon"
 end
 
+##
+# Try to start the daemon. Warns if the daemon is running already.
 def try_start_daemon
   if daemon_process
     warn "The daemon is already running."
@@ -42,13 +51,15 @@ def try_start_daemon
     
     puts "Starting daemon"
     job = fork do
+      STDERR.reopen(File.open('daemon-error.log', 'w+'))
       DRb.start_service(server_uri, $daemon)
       DRb.thread.join if DRb.thread
     end
     Process.detach job
   end
 end
-
+##
+# Try to stop the daemon. Warns if the daemon is not running.
 def try_stop_daemon
   pid = daemon_process
   if !pid
@@ -59,6 +70,8 @@ def try_stop_daemon
   end
 end
 
+##
+# Get the PID of the daemon process.
 def daemon_process
   pid = nil
   Sys::ProcTable.ps do |process|
@@ -70,6 +83,8 @@ def daemon_process
   pid
 end
 
+##
+# Shut down the DRb service, allowing the daemon to exit gracefully.
 def terminate!
   DRb.stop_service
 end
@@ -116,21 +131,21 @@ module Overwatch
     ##
     # Query the servers for their status
     def update_status
-      begin
-        @servers.each do |type|
+      @servers.each do |type|
+        begin
           @server_status.send("#{type}_reinitialize") # re-ping the server
           @status[type] = {}
           @status[type]['online'] = try_method("#{type}_status")
           @status[type]['player count']  = try_method("#{type}_player_count")
           @status[type]['motd'] = try_method("#{type}_motd")
           @status[type]['player list'] = try_method("#{type}_player_list")
-        end
 
         # All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
-      rescue Exception => e
-        warn e.inspect
-        warn e.backtrace
-        @status = {}
+        rescue Exception => e
+          warn e.inspect
+          warn e.backtrace
+          @status[type] = {}
+        end
       end
     end
     private :update_status
