@@ -4,7 +4,7 @@ require_relative 'server-shared'
 
 module Overwatch
   #=== Terraria ===
-
+  # Requires TShock
   class TerrariaServer
     include Overwatch::ServerShared
 
@@ -26,6 +26,8 @@ module Overwatch
     def player_list
       if @status
         @status['players'].split(', ')
+      else
+        []
       end
     end
 
@@ -42,7 +44,6 @@ module Overwatch
       begin
         @status = JSON.load(Net::HTTP.get(uri))
       rescue Exception => e # error = server down
-        $stderr.puts "Error: #{e.inspect}"
       end
     end
   end
