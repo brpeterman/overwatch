@@ -238,7 +238,7 @@ def build_irc_section(cgi, status)
   cgi.div('id' => 'irc-section',
           'class' => 'section') do
     details_section(cgi, "irc") do
-      details_line(cgi, "Server", "irc.rizon.net", 'server') +
+      details_line(cgi, "Server", status.irc_address, 'server') +
       details_line(cgi, "Channel", '#tkz/minecraft', 'channel') +
       details_line(cgi, "Users online",
                    if status.irc_player_list
