@@ -23,6 +23,9 @@ def run!
     elsif command == "stop"
       try_stop_daemon
 
+    elsif command == "fg"
+      try_start_daemon fg: true
+
     else
       show_help
     end
@@ -38,11 +41,12 @@ def show_help
   puts "Commands:"
   puts "  start - start the daemon"
   puts "  stop  - stop the daemon"
+  puts "  fg    - start in foreground"
 end
 
 ##
 # Try to start the daemon. Warns if the daemon is running already.
-def try_start_daemon
+def try_start_daemon(fg: false)
   if daemon_process
     warn "The daemon is already running."
   else
@@ -50,12 +54,17 @@ def try_start_daemon
     server_uri = 'druby://localhost:8787'
     
     puts "Starting daemon"
-    job = fork do
-      STDERR.reopen(File.open('daemon-error.log', 'w+'))
+    if !fg
+      job = fork do
+        STDERR.reopen(File.open('daemon-error.log', 'w+'))
+        DRb.start_service(server_uri, $daemon)
+        DRb.thread.join if DRb.thread
+      end
+      Process.detach job
+    else
       DRb.start_service(server_uri, $daemon)
       DRb.thread.join if DRb.thread
     end
-    Process.detach job
   end
 end
 ##
@@ -95,7 +104,7 @@ module Overwatch
   ##
   # This class queries all the servers it knows about for their current status.
   class StatusDaemon
-    attr_reader :status, :last_update
+    attr_reader :last_update
 
     ##
     # Initialize the object. No surprises here.

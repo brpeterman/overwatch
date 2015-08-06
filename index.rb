@@ -75,9 +75,10 @@ end
 # [sections] Hash of sections to display.
 def build_tabs_html(cgi, status, sections)
   sections.reduce("") do |html, (type, title)|
-    html += cgi.div('id' => "#{type}-status",
-                    'class' => 'statusline',
-                    'onclick' => "selectTab('#{type}')") do
+    html += cgi.a('id' => "#{type}-status",
+                  'class' => 'statusline',
+                  'onclick' => "selectTab('#{type}')",
+                  'href' => "\##{type}") do
       cgi.div('class' => 'status-title') do
         title +
           if status.respond_to?("#{type}_player_count")
@@ -224,6 +225,31 @@ def build_terraria_section(cgi, status)
   end
 end
 
+def build_civ_section(cgi, status)
+  cgi.div('id' => 'civ-section',
+          'class' => 'section') do
+    cgi.iframe('id' => 'civ-frame',
+               'seamless' => 'seamless',
+               'src' => 'http://civ.ngrok.io/')
+  end
+end
+
+def build_irc_section(cgi, status)
+  cgi.div('id' => 'irc-section',
+          'class' => 'section') do
+    details_section(cgi, "irc") do
+      details_line(cgi, "Server", "irc.rizon.net", 'server') +
+      details_line(cgi, "Channel", '#tkz/minecraft', 'channel') +
+      details_line(cgi, "Users online",
+                   if status.irc_player_list
+                     status.irc_player_list.join(', ')
+                   else
+                     "None"
+                   end, 'player_list')
+    end
+  end
+end
+
 ##
 # Build HTML for a line of the details section
 # [cgi] CGI object used for output.
@@ -265,6 +291,8 @@ sections[:starbound] = "Starbound"
 sections[:kerbal] = "Kerbal Space Program"
 sections[:sevendays] = "7 Days to Die"
 sections[:mumble] = "Mumble"
+sections[:civ] = "Civilization V"
+sections[:irc] = "IRC"
 
 # Output the page
 output_html(sections)

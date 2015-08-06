@@ -5,6 +5,8 @@ require_relative 'server-classes/sevendays-server'
 require_relative 'server-classes/terraria-server'
 require_relative 'server-classes/starbound-server'
 require_relative 'server-classes/mumble-server'
+require_relative 'server-classes/civ-server'
+require_relative 'server-classes/irc-server'
 
 module Overwatch
   ##
