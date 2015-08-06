@@ -97,7 +97,13 @@ function updateStatus(e) {
   Once we know the document is complete, select the first tab, make sure everything is sized correctly, and set up the refresh event.
 */
 document.addEventListener("DOMContentLoaded", function(event) {
-    selectTab("minecraft");
+    if (document.location.hash !== "") {
+        var selection = document.location.hash.substring(1)
+        selectTab(selection);
+    }
+    else {
+        selectTab("minecraft");
+    }
     resize();
     var evtSource = new EventSource("refresh.rb");
     evtSource.onmessage = updateStatus;
