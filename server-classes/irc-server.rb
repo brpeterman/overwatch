@@ -1,5 +1,6 @@
 require_relative 'server-shared'
 require 'irc-connection'
+require 'drb/drb'
 
 module Overwatch
   class IRCServer
@@ -10,24 +11,30 @@ module Overwatch
       @barriers = {}
       @config = config["irc"]
       @nick = @config["nick"]
+      @last_turn = 0
 
       @bot = RubyIRC::IRCConnection.new @config["nicks"].first, @config["username"], @config["realname"]
       #@bot.instance_eval do
       #  @debug = true
       #end
 
+      # Set up bot and connect to server
       add_handlers
       @connection_thread = Thread.start do
           @bot.connect @config["serveraddr"], @config["serverport"]
       end
+
+      reinitialize(skip_query: skip_query)
     end
 
     def reinitialize(config = nil, skip_query: nil)
-      # Request users online
-      @barriers[:namreply] = true
-      @bot.names @config["channel"]
-      while @barriers[:namreply] do end
-      @status[:player_list]
+      if !skip_query
+        # Request users online
+        @barriers[:namreply] = true
+        @bot.names @config["channel"]
+        while @barriers[:namreply] do end
+        @status[:player_list]
+      end
     end
 
     def status
@@ -46,9 +53,42 @@ module Overwatch
       end
     end
 
+    def motd
+      @status[:topic] or ""
+    end
+
     def disconnect(msg = nil)
       @bot.quit(msg)
       @connection_thread.join
+    end
+
+    def civ_turn
+      return if !@daemon
+
+      status = @daemon.status
+      if status['civ']
+        status['civ']['turn'].to_i
+      end
+    end
+
+    def civ_any_offline
+      return if !@daemon
+
+      status = @daemon.status['civ']
+      status['player list']
+    end
+
+    def poll_civ_updates
+      while @bot.connected
+        sleep 10
+        turn = civ_turn
+        if @last_turn != turn
+          if civ_any_offline
+            @bot.privmsg @config['channel'], "[Civ] Turn #{turn} has begun."
+            @last_turn = turn
+          end
+        end
+      end
     end
 
     def add_handlers
@@ -89,6 +129,20 @@ module Overwatch
 
     def handle_endofmotd(event)
       @bot.join @config["channel"]
+
+      if !@daemon
+        # Connect to the status daemon
+        server_uri = 'druby://localhost:8787'
+        @daemon = DRbObject.new_with_uri server_uri
+        @last_turn = civ_turn
+      end
+
+      if !@civ_thread
+        # Poll for updates to civ turn
+        @civ_thread = Thread.start do
+          poll_civ_updates
+        end
+      end
     end
 
     def handle_join(event)
