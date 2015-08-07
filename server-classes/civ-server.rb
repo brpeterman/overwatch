@@ -15,12 +15,26 @@ module Overwatch
       begin
         @status = JSON.load(Net::HTTP.get(uri))
       rescue
-        @status = {}
+        @status = nil
       end
     end
 
     def status
       @status != nil
+    end
+
+    def turn
+      if @status
+        @status["turn"].to_i
+      end
+    end
+
+    def player_list
+      if @status
+        @status["players"].reject {|p| p["online"] != 1}.each_index.map {|i| "Player #{i}"}
+      else
+        []
+      end
     end
 
     def player_count
