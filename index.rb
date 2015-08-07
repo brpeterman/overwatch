@@ -240,6 +240,7 @@ def build_irc_section(cgi, status)
     details_section(cgi, "irc") do
       details_line(cgi, "Server", status.irc_address, 'server') +
       details_line(cgi, "Channel", '#tkz/minecraft', 'channel') +
+      details_line(cgi, "Topic", status.irc_motd, 'motd') +
       details_line(cgi, "Users online",
                    if status.irc_player_list
                      status.irc_player_list.join(', ')
