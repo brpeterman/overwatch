@@ -148,11 +148,14 @@ module Overwatch
           @status[type]['player count']  = try_method("#{type}_player_count")
           @status[type]['motd'] = try_method("#{type}_motd")
           @status[type]['player list'] = try_method("#{type}_player_list")
+          @status[type]['turn'] = try_method("#{type}_turn")
 
         # All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
         rescue Exception => e
-          warn e.inspect
-          warn e.backtrace
+          warn "[#{Time.now}] #{e.inspect}"
+          e.backtrace.each do |msg|
+            warn "[#{Time.now}] #{msg}"
+          end
           @status[type] = {}
         end
       end
