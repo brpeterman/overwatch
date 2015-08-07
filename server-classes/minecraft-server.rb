@@ -1,4 +1,4 @@
-require_relative 'query'
+require 'minecraft-query'
 require_relative 'server-shared'
 
 module Overwatch
@@ -15,7 +15,7 @@ module Overwatch
       @config = config["minecraft"] if config
 
       return if skip_query
-      @status = Query.simpleQuery(@config['serveraddr'], @config['serverport'])
+      @status = Query::simpleQuery(@config['serveraddr'], @config['serverport'])
       if @status.kind_of? Exception then
         @status = nil
       end
