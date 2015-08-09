@@ -32,8 +32,6 @@ module Overwatch
         # Request users online
         @barriers[:namreply] = true
         @bot.names @config["channel"]
-        while @barriers[:namreply] do end
-        @status[:player_list]
       end
     end
 
@@ -71,22 +69,13 @@ module Overwatch
       end
     end
 
-    def civ_any_offline
-      return if !@daemon
-
-      status = @daemon.status['civ']
-      status['player list']
-    end
-
     def poll_civ_updates
       while @bot.connected
         sleep 10
         turn = civ_turn
-        if @last_turn != turn
-          if civ_any_offline
-            @bot.privmsg @config['channel'], "[Civ] Turn #{turn} has begun."
-            @last_turn = turn
-          end
+        if @last_turn != turn && turn != 0
+          @bot.privmsg @config['channel'], "[Civ] Turn #{turn} has begun."
+          @last_turn = turn
         end
       end
     end
@@ -123,7 +112,7 @@ module Overwatch
     end
 
     def handle_namreply(event)
-      @status[:player_list] = event.params.last.split ' '
+      @status[:player_list] = event.params.last.split(' ').map {|name| name.tr('+@~&%', '')}.sort
       @barriers[:namreply] = nil
     end
 
