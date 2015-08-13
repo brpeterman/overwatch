@@ -85,7 +85,7 @@ module Overwatch
       end
     end
 
-    def active_players
+    def civ_active_players
       return if !@daemon
 
       Set.new []
@@ -98,14 +98,14 @@ module Overwatch
         sleep 10
         turn = civ_turn
         if @last_turn != turn && turn != 0
-          report_turn
           @last_turn = turn
+          report_turn
         end
 
-        active = active_players
+        active = civ_active_players
         if @last_active != active && !active.empty && !@last_active.empty?
-          report_active
           @last_active = active
+          report_active
         end
       end
     end
@@ -115,10 +115,14 @@ module Overwatch
         dest = @config['channel']
       end
 
+      if turn == nil
+        turn = civ_turn
+      end
+
       if @last_turn == 0
-        @bot.privmsg dest, "The current turn is unknown at this time."
+        @bot.privmsg dest, "[Civ] The current turn is unknown at this time."
       else
-        @bot.privmsg dest, "[Civ] Turn #{turn} has begun."
+        @bot.privmsg dest, "[Civ] Turn #{@last_turn} has begun."
       end
     end
 
@@ -128,9 +132,9 @@ module Overwatch
       end
 
       if @last_active.empty?
-        @bot.privmsg dest, "No players may play at this time."
+        @bot.privmsg dest, "[Civ] No players may play at this time."
       else
-        @bot.privmsg dest, "[Civ] The following players may take their turn: #{active.to_a.join(', ')}"
+        @bot.privmsg dest, "[Civ] The following players may take their turn: #{@last_active.to_a.join(', ')}"
       end
     end
 
