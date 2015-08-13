@@ -52,5 +52,9 @@ module Overwatch
         "0/0"
       end
     end
+
+    def active_players
+      []
+    end
   end
 end

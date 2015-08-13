@@ -1,6 +1,7 @@
 require_relative 'server-shared'
 require 'irc-connection'
 require 'drb/drb'
+require 'set'
 
 module Overwatch
   # IRC
@@ -16,6 +17,7 @@ module Overwatch
       @config = config["irc"]
       @nick = @config["nick"]
       @last_turn = 0
+      @last_active = Set.new []
 
       @bot = RubyIRC::IRCConnection.new @config["nicks"].first, @config["username"], @config["realname"]
       #@bot.instance_eval do
@@ -83,6 +85,12 @@ module Overwatch
       end
     end
 
+    def active_players
+      return if !@daemon
+
+      Set.new []
+    end
+
     # Poll for updates to the Civ game status.
     # When the turn advances, send a message to the channel.
     def poll_civ_updates
@@ -90,9 +98,39 @@ module Overwatch
         sleep 10
         turn = civ_turn
         if @last_turn != turn && turn != 0
-          @bot.privmsg @config['channel'], "[Civ] Turn #{turn} has begun."
+          report_turn
           @last_turn = turn
         end
+
+        active = active_players
+        if @last_active != active && !active.empty && !@last_active.empty?
+          report_active
+          @last_active = active
+        end
+      end
+    end
+
+    def report_turn(dest = nil)
+      if dest == nil
+        dest = @config['channel']
+      end
+
+      if @last_turn == 0
+        @bot.privmsg dest, "The current turn is unknown at this time."
+      else
+        @bot.privmsg dest, "[Civ] Turn #{turn} has begun."
+      end
+    end
+
+    def report_active(dest = nil)
+      if dest == nil
+        dest = @config['channel']
+      end
+
+      if @last_active.empty?
+        @bot.privmsg dest, "No players may play at this time."
+      else
+        @bot.privmsg dest, "[Civ] The following players may take their turn: #{active.to_a.join(', ')}"
       end
     end
 
@@ -179,7 +217,16 @@ module Overwatch
     end
 
     def handle_privmsg(event)
-      # nothing happens
+      # Report the current civ turn if asked
+      if event.params.last == ".turn"
+        dest = event.params.first
+        if dest == @bot.nick
+          dest = event.from
+        end
+
+        report_turn(dest)
+        report_active(dest)
+      end
     end
   end
 end
