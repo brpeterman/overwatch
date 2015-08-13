@@ -3,9 +3,13 @@ require 'irc-connection'
 require 'drb/drb'
 
 module Overwatch
+  # IRC
   class IRCServer
     include Overwatch::ServerShared
 
+    # Set up the IRC bot and connect to the server and channel
+    # [config] configuration data. (See ServerStatus)
+    # [skip_query] Pass true to skip sending a NAMES query upon connecting.
     def initialize(config = nil, skip_query: nil)
       @status = {}
       @barriers = {}
@@ -27,6 +31,9 @@ module Overwatch
       reinitialize(skip_query: skip_query)
     end
 
+    # Send a NAMES query. If skip_query is not true, this method does nothing.
+    # [config] Not used.
+    # [skip_query] Pass true to skip sending the NAMES query
     def reinitialize(config = nil, skip_query: nil)
       if !skip_query
         # Request users online
@@ -35,31 +42,38 @@ module Overwatch
       end
     end
 
+    # Status of IRC server. Always returns true.
     def status
       true # If IRC goes down, don't come complaining to me
     end
 
+    # List of users connected to the channel.
     def player_list
       @status[:player_list] or []
     end
 
+    # Number of users connected to the channel.
+    # Returns a string.
     def player_count
       if @status[:player_list]
-        @status[:player_list].count
+        @status[:player_list].count.to_s
       else
         "0"
       end
     end
 
+    # Channel topic.
     def motd
       @status[:topic] or ""
     end
 
+    # Disconnect the bot from the server.
     def disconnect(msg = nil)
       @bot.quit(msg)
       @connection_thread.join
     end
 
+    # Return the current turn in the Civ game.
     def civ_turn
       return if !@daemon
 
@@ -69,6 +83,8 @@ module Overwatch
       end
     end
 
+    # Poll for updates to the Civ game status.
+    # When the turn advances, send a message to the channel.
     def poll_civ_updates
       while @bot.connected
         sleep 10
@@ -80,6 +96,7 @@ module Overwatch
       end
     end
 
+    # Add event handlers to the bot.
     def add_handlers
       # namreply
       @bot.add_handler 'namreply' do |event|
@@ -111,11 +128,14 @@ module Overwatch
       end
     end
 
+    # Handle NAMREPLY event.
+    # Parses the list of nicknames and places them in @status[:player_list]
     def handle_namreply(event)
       @status[:player_list] = event.params.last.split(' ').map {|name| name.tr('+@~&%', '')}.sort
       @barriers[:namreply] = nil
     end
 
+    # Handle ENDOFMOTD event.
     def handle_endofmotd(event)
       @bot.join @config["channel"]
 
