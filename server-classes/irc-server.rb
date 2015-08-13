@@ -15,7 +15,7 @@ module Overwatch
       @status = {}
       @barriers = {}
       @config = config["irc"]
-      @nick = @config["nick"]
+      @nick = @config["nicks"].first
       @last_turn = 0
       @last_active = Set.new []
 
@@ -220,7 +220,7 @@ module Overwatch
       # Report the current civ turn if asked
       if event.params.last == ".turn"
         dest = event.params.first
-        if dest == @bot.nick
+        if dest == @nick
           dest = event.from
         end
 
