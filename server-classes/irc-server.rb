@@ -115,10 +115,6 @@ module Overwatch
         dest = @config['channel']
       end
 
-      if turn == nil
-        turn = civ_turn
-      end
-
       if @last_turn == 0
         @bot.privmsg dest, "[Civ] The current turn is unknown at this time."
       else
