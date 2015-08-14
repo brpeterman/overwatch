@@ -78,7 +78,7 @@ function updateStatus(e) {
 		            var selector = "." + field.replace(' ', '_') + "-value";
 		            var valueElem = sectionElem.querySelector(selector);
 		            if (valueElem) {
-		                if (field == "player list") {
+		                if (field == "player_list") {
 			                  if (serverStatus[field] == "") {
 			                      serverStatus[field] = "None";
 			                  }
