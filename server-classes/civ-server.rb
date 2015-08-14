@@ -56,8 +56,21 @@ module Overwatch
         end
       end
 
-      define_info :active_players do
-        []
+      define_info :players_unsubmitted do
+        if @status
+          players = @status["players"]
+          players = players.each_with_index.map do |player, index|
+            player["name"] = "Player #{index}"
+          end
+
+          players.reduce([]) do |acc, player|
+            if player["submitted"] == 1
+              acc << player["name"]
+            end
+          end
+        else
+          []
+        end
       end
     end
   end
