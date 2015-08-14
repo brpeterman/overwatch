@@ -13,11 +13,13 @@ module Overwatch
     end
 
     def reinitialize(config = nil, skip_query: nil)
-      uri = URI(@config["queryaddr"] + @config["querystring"])
-      begin
-        @status = JSON.load(Net::HTTP.get(uri))
-      rescue
-        @status = nil
+      if config && !skip_query
+        uri = URI(@config["queryaddr"] + @config["querystring"])
+        begin
+          @status = JSON.load(Net::HTTP.get(uri))
+        rescue
+          @status = nil
+        end
       end
     end
 
