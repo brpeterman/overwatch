@@ -30,7 +30,7 @@ module Overwatch
       # Set up bot and connect to server
       add_handlers
       @connection_thread = Thread.start do
-          @bot.connect @config["serveraddr"], @config["serverport"]
+        @bot.connect @config["serveraddr"], @config["serverport"]
       end
 
       reinitialize(skip_query: skip_query)
@@ -124,7 +124,7 @@ module Overwatch
       end
 
       if @last_turn == 0
-        @bot.privmsg dest, "[Civ] The current turn is unknown at this time."
+        @bot.privmsg dest, "[Civ] The current turn is unknown right now."
       else
         @bot.privmsg dest, "[Civ] Turn #{@last_turn} has begun."
       end
@@ -136,7 +136,7 @@ module Overwatch
       end
 
       if @last_needed.empty?
-        @bot.privmsg dest, "[Civ] No players need to take their turn at this time."
+        @bot.privmsg dest, "[Civ] No players need to take their turn right now."
       else
         @bot.privmsg dest, "[Civ] The following players have not yet taken their turn: #{@last_needed.to_a.join(', ')}"
       end

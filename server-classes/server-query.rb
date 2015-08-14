@@ -16,7 +16,7 @@ module Overwatch
       return {} if !defined? @info_providers
 
       @info_providers.reduce({}) do |acc, method_name|
-        acc[method_name] = self.send method_name
+        acc[method_name.to_s] = self.send method_name
         acc
       end
     end
