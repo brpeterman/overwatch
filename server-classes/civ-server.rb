@@ -61,10 +61,11 @@ module Overwatch
           players = @status["players"]
           players = players.each_with_index.map do |player, index|
             player["name"] = "Player #{index}"
+            player
           end
 
           players.reduce([]) do |acc, player|
-            if player["submitted"] == 1
+            if player["submitted"] != 1
               acc << player["name"]
             end
           end
