@@ -56,7 +56,7 @@ function updateStatus(e) {
 	      var tabElem = document.getElementById(key + "-status")
 	      if (tabElem) {
 	          var statusElem = tabElem.querySelector(".status")
-	          if (status[key]["online"]) {
+	          if (status[key]["status"]) {
 		            statusElem.classList.remove("offline");
 		            statusElem.classList.add("online");
 		            statusElem.innerHTML = "Online";
@@ -68,7 +68,7 @@ function updateStatus(e) {
 	          }
 	          var countElem = tabElem.querySelector(".player-count");
 	          if (countElem) {
-		            countElem.innerHTML = "(" + status[key]["player count"] + ")";
+		            countElem.innerHTML = "(" + status[key]["player_count"] + ")";
 	          }
 	      }
 	      var serverStatus = status[key];
