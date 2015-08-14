@@ -138,7 +138,7 @@ module Overwatch
       if @last_needed.empty?
         @bot.privmsg dest, "[Civ] No players need to take their turn right now."
       else
-        @bot.privmsg dest, "[Civ] The following players have not yet taken their turn: #{@last_needed.to_a.join(', ')}"
+        @bot.privmsg dest, "[Civ] The game is waiting on turns from these players: #{@last_needed.to_a.join(', ')}"
       end
     end
 
