@@ -34,7 +34,7 @@ module Overwatch
 
       define_info :player_list do
         if @status
-          @status["players"].reject {|p| p["online"] != 1}.each_index.map {|i| "Player #{i}"}
+          @status["players"].reject {|p| p["connected"] != 1}.map {|player| player["name"]}
         else
           []
         end
@@ -44,7 +44,7 @@ module Overwatch
         if @status
           maxplayers = @status["players"].count
           online = @status["players"].reduce(0) do |acc, player|
-            if player["online"] == 1
+            if player["connected"] == 1
               acc += 1
             else
               acc
@@ -59,13 +59,8 @@ module Overwatch
       define_info :players_unsubmitted do
         if @status
           players = @status["players"]
-          players = players.each_with_index.map do |player, index|
-            player["name"] = "Player #{index}"
-            player
-          end
-
           players.reduce([]) do |acc, player|
-            if player["submitted"] != 1
+            if player["status"] == 1
               acc << player["name"]
             end
             acc
