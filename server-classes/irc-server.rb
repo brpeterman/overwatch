@@ -18,7 +18,7 @@ module Overwatch
       @config = config["irc"]
       @nick = @config["nicks"].first
       @last_turn = 0
-      @last_active = Set.new []
+      @last_needed = Set.new
 
       add_info_methods
 
@@ -90,10 +90,13 @@ module Overwatch
       end
     end
 
-    def civ_active_players
+    def civ_unsubmitted_players
       return if !@daemon
 
-      Set.new []
+      status = @daemon.status
+      if status['civ']
+        Set.new status['civ']['players_unsubmitted']
+      end
     end
 
     # Poll for updates to the Civ game status.
@@ -107,10 +110,10 @@ module Overwatch
           report_turn
         end
 
-        active = civ_active_players
-        if @last_active != active && !active.empty && !@last_active.empty?
-          @last_active = active
-          report_active
+        needed = civ_unsubmitted_players
+        if @last_needed != needed && !needed.empty && !@last_needed.empty?
+          @last_needed = needed
+          report_needed
         end
       end
     end
@@ -127,15 +130,15 @@ module Overwatch
       end
     end
 
-    def report_active(dest = nil)
+    def report_needed(dest = nil)
       if dest == nil
         dest = @config['channel']
       end
 
-      if @last_active.empty?
-        @bot.privmsg dest, "[Civ] No players may play at this time."
+      if @last_needed.empty?
+        @bot.privmsg dest, "[Civ] No players need to take their turn at this time."
       else
-        @bot.privmsg dest, "[Civ] The following players may take their turn: #{@last_active.to_a.join(', ')}"
+        @bot.privmsg dest, "[Civ] The following players have not yet taken their turn: #{@last_needed.to_a.join(', ')}"
       end
     end
 
@@ -230,7 +233,7 @@ module Overwatch
         end
 
         report_turn(dest)
-        report_active(dest)
+        report_needed(dest)
       end
     end
   end
