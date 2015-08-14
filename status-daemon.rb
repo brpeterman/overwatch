@@ -128,16 +128,6 @@ module Overwatch
     private :populate_servers
 
     ##
-    # Tries to call a method on the server status object.
-    # If the method doesn't exist, just return nil.
-    def try_method(method, *args)
-      if @server_status.respond_to? method then
-        @server_status.send(method, *args)
-      end
-    end
-    private :try_method
-
-    ##
     # Query the servers for their status
     def update_status
       @servers.each do |type|
