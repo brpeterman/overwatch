@@ -13,7 +13,7 @@ module Overwatch
     end
 
     def reinitialize(config = nil, skip_query: nil)
-      uri = URI('http://civ.ngrok.io/status.json')
+      uri = URI(@config["queryaddr"] + @config["querystring"])
       begin
         @status = JSON.load(Net::HTTP.get(uri))
       rescue
