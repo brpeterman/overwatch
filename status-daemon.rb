@@ -143,12 +143,7 @@ module Overwatch
       @servers.each do |type|
         begin
           @server_status.send("#{type}_reinitialize") # re-ping the server
-          @status[type] = {}
-          @status[type]['online'] = try_method("#{type}_status")
-          @status[type]['player count']  = try_method("#{type}_player_count")
-          @status[type]['motd'] = try_method("#{type}_motd")
-          @status[type]['player list'] = try_method("#{type}_player_list")
-          @status[type]['turn'] = try_method("#{type}_turn")
+          @status[type] = @server_status.send("#{type}_all_info")
 
         # All sorts of invalid input can potentially cause an error. Whatever it is, just make sure we return a valid object.
         rescue Exception => e
