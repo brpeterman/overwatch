@@ -1,13 +1,15 @@
 require 'minecraft-query'
 require_relative 'server-shared'
+require_relative 'server-query'
 
 module Overwatch
   #=== Minecraft ===
 
-  class MinecraftServer
+  class MinecraftServer < ServerQuery
     include Overwatch::ServerShared
 
     def initialize(config = nil, skip_query: nil)
+      add_info_methods
       reinitialize(config, skip_query: skip_query)
     end
 
@@ -21,23 +23,25 @@ module Overwatch
       end
     end
 
-    def status
-      @status != nil
-    end
-
-    def player_count
-      if @status
-        "#{@status[:numplayers]}/#{@status[:maxplayers]}"
-      else
-        "0/0"
+    def add_info_methods
+      define_info :status do
+        @status != nil
       end
-    end
 
-    def motd
-      if @status
-        @status[:motd]
-      else
-        ""
+      define_info :player_count do
+        if @status
+          "#{@status[:numplayers]}/#{@status[:maxplayers]}"
+        else
+          "0/0"
+        end
+      end
+
+      define_info :motd do
+        if @status
+          @status[:motd]
+        else
+          ""
+        end
       end
     end
   end

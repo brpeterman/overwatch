@@ -1,12 +1,14 @@
 require_relative 'server-shared'
+require_relative 'server-query'
 
 module Overwatch
   #=== 7 Days to Die ===
 
-  class SevendaysServer
+  class SevendaysServer < ServerQuery
     include Overwatch::ServerShared
 
     def initialize(config = nil, skip_query: nil)
+      add_info_methods
       reinitialize(config, skip_query: skip_query)
     end
 
@@ -18,8 +20,10 @@ module Overwatch
       @status = (processes.split("\n")[1] != nil)
     end
 
-    def status
-      @status
+    def add_info_methods
+      define_info :status do
+        @status
+      end
     end
   end
 end

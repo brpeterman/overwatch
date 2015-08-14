@@ -1,14 +1,16 @@
 require 'json'
 require 'net/http'
 require_relative 'server-shared'
+require_relative 'server-query'
 
 module Overwatch
   #=== Terraria ===
   # Requires TShock
-  class TerrariaServer
+  class TerrariaServer < ServerQuery
     include Overwatch::ServerShared
 
     def initialize(config = nil, skip_query: nil)
+      add_info_methods
       reinitialize(config, skip_query: skip_query)
     end
 
@@ -19,23 +21,25 @@ module Overwatch
       update_terraria_status
     end
 
-    def status
-      @status != nil
-    end
-
-    def player_list
-      if @status
-        @status['players'].split(', ')
-      else
-        []
+    def add_info_methods
+      define_info :status do
+        @status != nil
       end
-    end
 
-    def player_count
-      if @status
-        "#{@status['playercount']}/8"
-      else
-        "0/0"
+      define_info :player_list do
+        if @status
+          @status['players'].split(', ')
+        else
+          []
+        end
+      end
+
+      define_info :player_count do
+        if @status
+          "#{@status['playercount']}/8"
+        else
+          "0/0"
+        end
       end
     end
 

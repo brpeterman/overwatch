@@ -1,12 +1,14 @@
 require_relative 'server-shared'
+require_relative 'server-query'
 
 module Overwatch
   #=== Starbound ===
 
-  class StarboundServer
+  class StarboundServer < ServerQuery
     include Overwatch::ServerShared
 
     def initialize(config = nil, skip_query: nil)
+      add_info_methods
       reinitialize(config, skip_query: skip_query)
     end
 
@@ -18,12 +20,10 @@ module Overwatch
       @status = (processes.split("\n")[1] != nil)
     end
 
-    def status
-      @status
-    end
-
-    def address
-      @config['serveraddr']
+    def add_info_methods
+      define_info :status do
+        @status
+      end
     end
   end
 end

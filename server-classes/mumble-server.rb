@@ -1,14 +1,16 @@
 require 'json'
 require 'net/http'
 require_relative 'server-shared'
+require_relative 'server-query'
 
 module Overwatch
   #=== Mumble ===
 
-  class MumbleServer
+  class MumbleServer < ServerQuery
     include Overwatch::ServerShared
 
     def initialize(config = nil, skip_query: nil)
+      add_info_methods
       reinitialize(config, skip_query: skip_query)
     end
 
@@ -27,15 +29,26 @@ module Overwatch
       end
     end
 
-    def status
-      @status != nil
-    end
+    def add_info_methods
+      define_info :status do
+        @status != nil
+      end
 
-    def player_list
-      if @status != nil then
-        channel_tree_users(@status["root"])
-      else
-        []
+      define_info :player_list do
+        if @status != nil then
+          channel_tree_users(@status["root"])
+        else
+          []
+        end
+      end
+
+      define_info :player_count do
+        if @status != nil then
+          users = channel_tree_users(@status["root"])
+          "#{users.count}/#{@max_players}"
+        else
+          "0/0"
+        end
       end
     end
 
@@ -46,15 +59,6 @@ module Overwatch
         users = users | channel_tree_users(subchannel)
       end
       users
-    end
-
-    def player_count
-      if @status != nil then
-        users = channel_tree_users(@status["root"])
-        "#{users.count}/#{@max_players}"
-      else
-        "0/0"
-      end
     end
   end
 

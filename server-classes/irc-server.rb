@@ -1,11 +1,12 @@
 require_relative 'server-shared'
+require_relative 'server-query'
 require 'irc-connection'
 require 'drb/drb'
 require 'set'
 
 module Overwatch
   # IRC
-  class IRCServer
+  class IRCServer < ServerQuery
     include Overwatch::ServerShared
 
     # Set up the IRC bot and connect to the server and channel
@@ -18,6 +19,8 @@ module Overwatch
       @nick = @config["nicks"].first
       @last_turn = 0
       @last_active = Set.new []
+
+      add_info_methods
 
       @bot = RubyIRC::IRCConnection.new @config["nicks"].first, @config["username"], @config["realname"]
       #@bot.instance_eval do
@@ -44,29 +47,31 @@ module Overwatch
       end
     end
 
-    # Status of IRC server. Always returns true.
-    def status
-      true # If IRC goes down, don't come complaining to me
-    end
-
-    # List of users connected to the channel.
-    def player_list
-      @status[:player_list] or []
-    end
-
-    # Number of users connected to the channel.
-    # Returns a string.
-    def player_count
-      if @status[:player_list]
-        @status[:player_list].count.to_s
-      else
-        "0"
+    def add_info_methods
+      # Status of IRC server. Always returns true.
+      define_info :status do
+        true # If IRC goes down, don't come complaining to me
       end
-    end
 
-    # Channel topic.
-    def motd
-      @status[:topic] or ""
+      # List of users connected to the channel.
+      define_info :player_list do
+        @status[:player_list] or []
+      end
+
+      # Number of users connected to the channel.
+      # Returns a string.
+      define_info :player_count do
+        if @status[:player_list]
+          @status[:player_list].count.to_s
+        else
+          "0"
+        end
+      end
+
+      # Channel topic.
+      define_info :motd do
+        @status[:topic] or ""
+      end
     end
 
     # Disconnect the bot from the server.

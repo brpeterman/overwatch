@@ -7,14 +7,6 @@ module Overwatch
       attr_reader :config
     end
 
-    def add_info(method_name, &block)
-      if block != nil
-        define_method method_name, &block
-      end
-
-      @info_providers << method_name
-    end
-
     ##
     # Return the address that players use to connect to the server.
     def address

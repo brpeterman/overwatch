@@ -1,14 +1,16 @@
 require 'json'
 require 'net/http'
 require_relative 'server-shared'
+require_relative 'server-query'
 
 module Overwatch
   #=== Kerbal Space Program ===
 
-  class KerbalServer
+  class KerbalServer < ServerQuery
     include Overwatch::ServerShared
 
     def initialize(config = nil, skip_query: nil)
+      add_info_methods
       reinitialize(config, skip_query: skip_query)
     end
 
@@ -22,24 +24,26 @@ module Overwatch
         @status = nil
       end
     end
-
-    def status
-      @status != nil
-    end
-
-    def player_count
-      if @status then
-        "#{@status['player_count']}/#{@status['max_players']}"
-      else
-        "0/0"
+    
+    def add_info_methods
+      define_info :status do
+        @status != nil
       end
-    end
 
-    def player_list
-      if @status
-        @status['players'].split /,\w*/
-      else
-        []
+      define_info :player_count do
+        if @status then
+          "#{@status['player_count']}/#{@status['max_players']}"
+        else
+          "0/0"
+        end
+      end
+
+      define_info :player_list do
+        if @status
+          @status['players'].split /,\w*/
+        else
+          []
+        end
       end
     end
   end
