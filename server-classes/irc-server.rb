@@ -55,13 +55,17 @@ module Overwatch
 
       # List of users connected to the channel.
       define_info :player_list do
-        @status[:player_list] or []
+        if @status
+          @status[:player_list] or []
+        else
+          []
+        end
       end
 
       # Number of users connected to the channel.
       # Returns a string.
       define_info :player_count do
-        if @status[:player_list]
+        if @status
           @status[:player_list].count.to_s
         else
           "0"
@@ -70,7 +74,16 @@ module Overwatch
 
       # Channel topic.
       define_info :motd do
-        @status[:topic] or ""
+        if @status
+          @status[:topic] or ""
+        end
+      end
+
+      # Channel
+      define_info :channel do
+        if @config
+          @config["channel"]
+        end
       end
     end
 
