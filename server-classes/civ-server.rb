@@ -68,6 +68,7 @@ module Overwatch
             if player["submitted"] != 1
               acc << player["name"]
             end
+            acc
           end
         else
           []
