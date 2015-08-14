@@ -103,6 +103,9 @@ module Overwatch
       end
     end
 
+    # Get a list of players who need to submit their turn before the game
+    # can advance.
+    # Returns a set.
     def civ_unsubmitted_players
       return if !@daemon
 
@@ -242,7 +245,7 @@ module Overwatch
       if event.params.last == ".turn"
         dest = event.params.first
         if dest == @nick
-          dest = event.from
+          dest = event.nick
         end
 
         report_turn(dest)
