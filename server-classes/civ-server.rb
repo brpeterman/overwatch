@@ -59,12 +59,7 @@ module Overwatch
       define_info :players_unsubmitted do
         if @status
           players = @status["players"]
-          players.reduce([]) do |acc, player|
-            if player["status"] == 1
-              acc << player["name"]
-            end
-            acc
-          end
+          players.reject{|player| player["status"] != 1}.map{|player| player["name"]}
         else
           []
         end
