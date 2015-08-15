@@ -127,7 +127,7 @@ module Overwatch
         end
 
         needed = civ_unsubmitted_players
-        if @last_needed != needed && !needed.empty?
+        if @last_needed != needed && !needed.empty? && !needed.proper_subset? @last_needed
           @last_needed = needed
           report_needed
         end
@@ -139,6 +139,7 @@ module Overwatch
         dest = @config['channel']
       end
 
+      @last_turn = civ_turn
       if @last_turn == 0
         @bot.privmsg dest, "[Civ] The current turn is unknown right now."
       else
@@ -151,6 +152,7 @@ module Overwatch
         dest = @config['channel']
       end
 
+      @last_needed = civ_unsubmitted_players
       if @last_needed.empty?
         @bot.privmsg dest, "[Civ] No players need to take their turn right now."
       else
