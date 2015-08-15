@@ -13,7 +13,7 @@ module Overwatch
     end
 
     def reinitialize(config = nil, skip_query: nil)
-      @config = config
+      @config = config["civ"]
       if @config && !skip_query
         uri = URI(@config["queryaddr"] + @config["querystring"])
         begin
