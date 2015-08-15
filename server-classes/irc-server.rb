@@ -65,7 +65,7 @@ module Overwatch
       # Number of users connected to the channel.
       # Returns a string.
       define_info :player_count do
-        if @status
+        if @status && @status[:player_list]
           @status[:player_list].count.to_s
         else
           "0"
