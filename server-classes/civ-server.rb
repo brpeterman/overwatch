@@ -13,7 +13,8 @@ module Overwatch
     end
 
     def reinitialize(config = nil, skip_query: nil)
-      if config && !skip_query
+      @config = config
+      if @config && !skip_query
         uri = URI(@config["queryaddr"] + @config["querystring"])
         begin
           @status = JSON.load(Net::HTTP.get(uri))
