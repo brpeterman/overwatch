@@ -18,9 +18,8 @@ module Overwatch
       end
 
       if @config && !skip_query
-        uri = URI(@config["queryaddr"] + @config["querystring"])
         begin
-          @status = JSON.load(Net::HTTP.get(uri))
+          @status = JSON.load(Net::HTTP.get(@config["queryaddr"], @config["querystring"]))
         rescue
           @status = nil
         end
