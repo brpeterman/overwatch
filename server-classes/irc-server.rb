@@ -127,7 +127,7 @@ module Overwatch
         end
 
         needed = civ_unsubmitted_players
-        if @last_needed != needed && !needed.empty? && !needed.proper_subset? @last_needed
+        if (@last_needed != needed) && (!needed.empty?) && (!needed.proper_subset? @last_needed)
           @last_needed = needed
           report_needed
         end
