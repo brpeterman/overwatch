@@ -19,6 +19,7 @@ module Overwatch
       @nick = @config["nicks"].first
       @last_turn = 0
       @last_needed = Set.new
+      @reported_players = Set.new
 
       add_info_methods
 
@@ -122,13 +123,13 @@ module Overwatch
         sleep 10
         turn = civ_turn
         if @last_turn != turn && turn != 0
-          @last_turn = turn
+          @reported_players = Set.new
           report_turn
         end
 
         needed = civ_unsubmitted_players
-        if (@last_needed != needed) && (!needed.empty?) && (!needed.proper_subset? @last_needed)
-          @last_needed = needed
+        if (@last_needed != needed) && (!needed.empty?) && (!needed.proper_subset? @reported_players)
+          @reported_players |= needed
           report_needed
         end
       end
