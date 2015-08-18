@@ -20,9 +20,9 @@ module Overwatch
       @nick = @config["nicks"].first
       @store = PStore.new 'irc_state.pstore'
       @store.transaction(true) do
-        @last_turn = @store[:last_turn] or 0
-        @last_needed = @store[:last_needed] or Set.new
-        @reported_players = @store[:reported_players] or Set.new
+        @last_turn = @store.fetch(:last_turn, 0)
+        @last_needed = @store.fetch(:last_needed, Set.new)
+        @reported_players = @store.fetch(:reported_players, Set.new)
       end
 
       add_info_methods
