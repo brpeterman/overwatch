@@ -3,6 +3,7 @@ require_relative 'server-query'
 require 'irc-connection'
 require 'drb/drb'
 require 'set'
+require 'pstore'
 
 module Overwatch
   # IRC
@@ -17,9 +18,12 @@ module Overwatch
       @barriers = {}
       @config = config["irc"]
       @nick = @config["nicks"].first
-      @last_turn = 0
-      @last_needed = Set.new
-      @reported_players = Set.new
+      @store = PStore.new 'irc_state.pstore'
+      @store.transaction(true) do
+        @last_turn = @store[:last_turn] or 0
+        @last_needed = @store[:last_needed] or Set.new
+        @reported_players = @store[:reported_players] or Set.new
+      end
 
       add_info_methods
 
@@ -146,6 +150,10 @@ module Overwatch
       else
         @bot.privmsg dest, "[Civ] Turn #{@last_turn} has begun."
       end
+
+      @store.transaction do
+        @store[:last_turn] = @last_turn
+      end
     end
 
     def report_needed(dest = nil)
@@ -158,6 +166,11 @@ module Overwatch
         @bot.privmsg dest, "[Civ] No players need to take their turn right now."
       else
         @bot.privmsg dest, "[Civ] The game is waiting on turns from these players: #{@last_needed.to_a.join(', ')}"
+      end
+
+      @store.transaction do
+        @store[:last_needed] = @last_needed
+        @store[:reported_players] = @reported_players
       end
     end
 
