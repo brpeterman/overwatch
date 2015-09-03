@@ -144,12 +144,17 @@ module Overwatch
         dest = @config['channel']
       end
 
-      @last_turn = civ_turn
+      save_turn civ_turn
+      
       if @last_turn == 0
         @bot.privmsg dest, "[Civ] The current turn is unknown right now."
       else
         @bot.privmsg dest, "[Civ] Turn #{@last_turn} has begun."
       end
+    end
+
+    def save_turn(turn)
+      @last_turn = turn
 
       @store.transaction do
         @store[:last_turn] = @last_turn
@@ -161,12 +166,17 @@ module Overwatch
         dest = @config['channel']
       end
 
-      @last_needed = civ_unsubmitted_players
+      save_players civ_unsubmitted_players
+
       if @last_needed.empty?
         @bot.privmsg dest, "[Civ] No players need to take their turn right now."
       else
         @bot.privmsg dest, "[Civ] The game is waiting on turns from these players: #{@last_needed.to_a.join(', ')}"
       end
+    end
+    
+    def save_players(players)
+      @last_needed = players
 
       @store.transaction do
         @store[:last_needed] = @last_needed
