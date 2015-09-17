@@ -86,6 +86,11 @@ function updateStatus(e) {
                             serverStatus[field] = serverStatus[field].join(', ');
                         }
                     }
+                    else if (field == "motd") {
+                        serverStatus[field] = URI.withinString(serverStatus[field], function(url) {
+                            return "<a href=\"" + url + "\">" + url + "</a>";
+                        });
+                    }
                     valueElem.innerHTML = serverStatus[field];
                 }
             }
