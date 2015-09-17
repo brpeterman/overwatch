@@ -38,6 +38,8 @@ def build_head_html(cgi)
     cgi.link('rel' => 'stylesheet',
              'href' => 'style.css') +
     cgi.script('type' => 'text/javascript',
+               'src' => 'URI.js') +
+    cgi.script('type' => 'text/javascript',
                'src' => 'script.js') +
     cgi.meta('name' => 'viewport',
              'content' => 'width=device-width, initial-scale=1') + # Let mobile devices do their own scaling
