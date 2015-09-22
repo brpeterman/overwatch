@@ -1,6 +1,6 @@
 require_relative 'server-shared'
 require_relative 'server-query'
-require 'irc-connection'
+require 'cinch'
 require 'drb/drb'
 require 'set'
 require 'pstore'
@@ -27,15 +27,17 @@ module Overwatch
 
       add_info_methods
 
-      @bot = RubyIRC::IRCConnection.new @config["nicks"].first, @config["username"], @config["realname"]
-      #@bot.instance_eval do
-      #  @debug = true
-      #end
+      @bot = Cinch::Bot.new
+      @bot.config.server = @config['serveraddr']
+      @bot.config.nick = @config['nicks'].first
+      @bot.config.user = @config['username']
+      @bot.config.realname = @config['realname']
+      @bot.config.channels = [@config['channel']]
 
       # Set up bot and connect to server
       add_handlers
       @connection_thread = Thread.start do
-        @bot.connect @config["serveraddr"], @config["serverport"]
+        @bot.start
       end
 
       reinitialize(skip_query: skip_query)
@@ -47,8 +49,10 @@ module Overwatch
     def reinitialize(config = nil, skip_query: nil)
       if !skip_query
         # Request users online
-        @barriers[:namreply] = true
-        @bot.names @config["channel"]
+        channel = @bot.channels.first
+        if channel
+          @status[:player_list] = channel.users.map {|user| user.first.nick }
+        end
       end
     end
 
@@ -79,8 +83,8 @@ module Overwatch
 
       # Channel topic.
       define_info :motd do
-        if @status
-          @status[:topic] or ""
+        if @bot.channels.first
+          @bot.channels.first.topic
         end
       end
 
@@ -123,7 +127,7 @@ module Overwatch
     # Poll for updates to the Civ game status.
     # When the turn advances, send a message to the channel.
     def poll_civ_updates
-      while @bot.connected
+      while @connected
         sleep 10
         turn = civ_turn
         if @last_turn != turn && turn != 0
@@ -147,9 +151,9 @@ module Overwatch
       save_turn civ_turn
       
       if @last_turn == 0
-        @bot.privmsg dest, "[Civ] The current turn is unknown right now."
+        @bot.channels.first.send "[Civ] The current turn is unknown right now."
       else
-        @bot.privmsg dest, "[Civ] Turn #{@last_turn} has begun."
+        @bot.channels.first.send "[Civ] Turn #{@last_turn} has begun."
       end
     end
 
@@ -186,47 +190,23 @@ module Overwatch
 
     # Add event handlers to the bot.
     def add_handlers
-      # namreply
-      @bot.add_handler 'namreply' do |event|
-        handle_namreply event
-      end
-
-      # endofmotd
-      @bot.add_handler 'endofmotd' do |event|
+      #endofmotd
+      @bot.on Cinch::Constants::RPL_ENDOFMOTD do |event|
         handle_endofmotd event
       end
 
-      # join
-      @bot.add_handler 'join' do |event|
-        handle_join event
-      end
-
-      #part
-      @bot.add_handler 'part' do |event|
-        handle_part event
-      end
-
-      # topic
-      @bot.add_handler 'topic' do |event|
-        handle_topic event
-      end
-
-      @bot.add_handler 'privmsg' do |event|
+      @bot.on :privmsg do |event|
         handle_privmsg event
       end
+
+      @bot.handlers.each do |handler|
+        handler.instance_eval do
+          @execute_in_callback = false
+        end
+      end
     end
 
-    # Handle NAMREPLY event.
-    # Parses the list of nicknames and places them in @status[:player_list]
-    def handle_namreply(event)
-      @status[:player_list] = event.params.last.split(' ').map {|name| name.tr('+@~&%', '')}.sort
-      @barriers[:namreply] = nil
-    end
-
-    # Handle ENDOFMOTD event.
     def handle_endofmotd(event)
-      @bot.join @config["channel"]
-
       if !@daemon
         # Connect to the status daemon
         server_uri = 'druby://localhost:8787'
@@ -242,36 +222,12 @@ module Overwatch
       end
     end
 
-    def handle_join(event)
-      # If the bot joined, make sure we know we're in the channel
-      if event.nick == @nick
-        # Ignore for now
-        # Otherwise, request a user list update
-      else
-        @bot.names event.params.first
-      end
-    end
-
-    def handle_part(event)
-      if event.nick == @bot.nick
-        # ignore for now
-      else
-        @barriers[:namreply] = true
-        @bot.names event.params.first
-        @barriers[:namreply] = nil
-      end
-    end
-
-    def handle_topic(event)
-      @status[:topic] = event.params.last
-    end
-
     def handle_privmsg(event)
       # Report the current civ turn if asked
       if event.params.last == ".turn"
         dest = event.params.first
         if dest == @nick
-          dest = event.nick
+          dest = event.user.nick
         end
 
         report_turn(dest)
