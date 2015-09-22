@@ -50,18 +50,19 @@ def try_start_daemon(fg: false)
   if daemon_process
     warn "The daemon is already running."
   else
-    $daemon = Overwatch::StatusDaemon.new
     server_uri = 'druby://localhost:8787'
     
     puts "Starting daemon"
     if !fg
       job = fork do
+        $daemon = Overwatch::StatusDaemon.new
         STDERR.reopen(File.open('daemon-error.log', 'w+'))
         DRb.start_service(server_uri, $daemon)
         DRb.thread.join if DRb.thread
       end
       Process.detach job
     else
+      $daemon = Overwatch::StatusDaemon.new
       DRb.start_service(server_uri, $daemon)
       DRb.thread.join if DRb.thread
     end
