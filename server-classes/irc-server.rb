@@ -29,7 +29,7 @@ module Overwatch
 
       @bot = Cinch::Bot.new
       @bot.config.server = @config['serveraddr']
-      @bot.config.nick = @config['nicks'].first
+      @bot.config.nicks = @config['nicks']
       @bot.config.user = @config['username']
       @bot.config.realname = @config['realname']
       @bot.config.channels = [@config['channel']]
