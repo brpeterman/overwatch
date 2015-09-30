@@ -28,12 +28,12 @@ module Overwatch
       add_info_methods
 
       @bot = Cinch::Bot.new
-      @bot.configure(@config) do |c, params|
-        c.server = params['serveraddr']
-        c.nicks = params['nicks']
-        c.user = params['username']
-        c.realname = params['realname']
-        c.channels = [params['channel']]
+      @bot.configure do |c|
+        c.server = @config['serveraddr']
+        c.nicks = @config['nicks']
+        c.user = @config['username']
+        c.realname = @config['realname']
+        c.channels = [@config['channel']]
       end
 
       # Set up bot and connect to server
