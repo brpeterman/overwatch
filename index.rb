@@ -40,7 +40,7 @@ def build_head_html(cgi)
     cgi.script('type' => 'text/javascript',
                'src' => 'URI.js') +
     cgi.script('type' => 'text/javascript',
-               'src' => 'script.js') +
+               'src' => 'overwatch.js') +
     cgi.meta('name' => 'viewport',
              'content' => 'width=device-width, initial-scale=1') + # Let mobile devices do their own scaling
     cgi.meta('charset' => 'utf-8')
@@ -79,7 +79,7 @@ def build_tabs_html(cgi, status, sections)
   sections.reduce("") do |html, (type, title)|
     html += cgi.a('id' => "#{type}-status",
                   'class' => 'statusline',
-                  'onclick' => "selectTab('#{type}')",
+                  'onclick' => "document.Overwatch.selectTab('#{type}')",
                   'href' => "\##{type}") do
       cgi.div('class' => 'status-title') do
         title +
@@ -134,7 +134,7 @@ def build_minecraft_section(cgi, status)
     # Map IFrame
     cgi.div('id' => 'map-container') do
       cgi.span('id' => 'toggle-map',
-               'onclick' => 'toggleMap()') do
+               'onclick' => 'document.Overwatch.toggleMap()') do
         "Show Map"
       end +
       cgi.iframe('id' => 'map-frame',
