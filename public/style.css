@@ -23,6 +23,7 @@ iframe#map-frame {
     height: 100%;
     width: 100%;
     background-color: #ffffff;
+    border: none;
 }
 
 #main-container {
