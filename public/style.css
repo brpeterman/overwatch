@@ -1,5 +1,6 @@
 body {
-    background-color: #c0c0c0;
+    background-color: rgb(31, 31, 31);
+    color: rgb(220, 220, 220);
     padding: 5px;
     margin: 0px;
     font-family: "Segoe UI", "Helvetica", "Arial", sans-serif;
@@ -7,6 +8,7 @@ body {
 }
 
 a {
+    color: rgb(86, 156, 214);
     text-decoration: none;
 }
 
@@ -14,6 +16,7 @@ iframe#map-frame {
     display: none;
     height: 100%;
     width: 100%;
+    border: none;
 }
 
 #civ-frame {
@@ -23,17 +26,11 @@ iframe#map-frame {
 }
 
 #main-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
 }
 
 #tabs {
     min-width: 320px;
     max-height: 100vh;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     overflow-y: auto;
 }
 
@@ -44,7 +41,6 @@ iframe#map-frame {
 }
 
 #status-box {
-    flex: 100;
 }
 
 #sections {
@@ -54,27 +50,25 @@ iframe#map-frame {
 }
 
 .statusline {
+    width: 250px;
+    height: 40px;
+    display: inline-block;
     padding: 6px;
     background-color: #484040;
     color: #d0d0d0;
     cursor: pointer;
     font-weight: bold;
-    text-align: left;
-    min-width: 200px;
-    display: flex;
-    flex-direction: row;
+    text-align: center;
+    margin: 3px;
 }
 
 .status-title {
-    display: inline-block;
-    flex: 10;
+    display: block;
 }
 
 .status-summary {
     display: inline-block;
     text-align: right;
-    min-width: 80px;
-    flex: 1;
 }
 
 .statusline:hover {
@@ -84,8 +78,8 @@ iframe#map-frame {
 
 .statusline.selected {
     background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.1));
-    background-color: #ffffff;
-    color: #000000;
+    background-color: rgb(51, 153, 255);
+    color: rgb(255, 255, 255);
 }
 
 .statusline:not(.selected) {
@@ -108,7 +102,7 @@ iframe#map-frame {
 }
 
 .statusline.selected span.online {
-    color: #008000;
+    color: rgb(240, 255, 240);
 }
 
 .offline {
@@ -116,7 +110,7 @@ iframe#map-frame {
 }
 
 .statusline:hover span.offline {
-    color: #a00000;
+    color: rgb(255, 240, 240);
 }
 
 .statusline.selected span.offline {
@@ -132,7 +126,7 @@ iframe#map-frame {
     flex-direction: column;
     padding: 4px;
     background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
-    background-color: #ffffff;
+    background-color: rgb(31, 31, 31);
     position: relative;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
@@ -161,7 +155,8 @@ iframe#map-frame {
 #toggle-map {
     font-weight: 600;
     cursor: pointer;
-    color: #000000;
+    color: rgb(220, 220, 220);
+    display: inline-block;
 }
 
 #toggle-map:hover {
@@ -170,7 +165,7 @@ iframe#map-frame {
 
 .details-section {
     max-width: 800px;
-    background-color: #f0f0f0;
+    background-color: rgb(31, 31, 31);
     padding: 10px;
     margin-bottom: 3px;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
