@@ -87,7 +87,7 @@ document.addEventListener "DOMContentLoaded", (event) ->
     selection = document.location.hash.substring(1)
     document.Overwatch.selectTab(selection)
   else
-    selectTab("minecraft")
+    document.Overwatch.selectTab("minecraft")
   
   document.Overwatch.resize()
   evtSource = new EventSource("refresh.rb")

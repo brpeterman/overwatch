@@ -52,7 +52,7 @@
       _results = [];
       for (_i = 0, _len = sections.length; _i < _len; _i++) {
         section = sections[_i];
-        _results.push(section.style.height = (browserHeight - rect.top - 15) + "px");
+        _results.push(section.style.height = "" + (browserHeight - rect.top - 15) + "px");
       }
       return _results;
     },
@@ -134,7 +134,7 @@
       selection = document.location.hash.substring(1);
       document.Overwatch.selectTab(selection);
     } else {
-      selectTab("minecraft");
+      document.Overwatch.selectTab("minecraft");
     }
     document.Overwatch.resize();
     evtSource = new EventSource("refresh.rb");
