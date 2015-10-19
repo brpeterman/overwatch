@@ -7,6 +7,7 @@ require_relative 'server-classes/starbound-server'
 require_relative 'server-classes/mumble-server'
 require_relative 'server-classes/civ-server'
 require_relative 'server-classes/irc-server'
+require_relative 'server-classes/discord-server'
 
 module Overwatch
   ##

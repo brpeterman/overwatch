@@ -217,12 +217,7 @@ def build_terraria_section(cgi, status)
           'class' => 'section') do
     details_section(cgi, 'terraria') do
       details_line(cgi, "Address", status.terraria_address, 'address') +
-      details_line(cgi, "Users online", 
-                   if status.terraria_player_list
-                     status.terraria_player_list.join(', ')
-                   else
-                     "None"
-                   end, 'player_list')
+      details_line(cgi, "Users online", "None", 'player_list')
     end
   end
 end
@@ -240,15 +235,22 @@ def build_irc_section(cgi, status)
   cgi.div('id' => 'irc-section',
           'class' => 'section') do
     details_section(cgi, "irc") do
-      details_line(cgi, "Server", status.irc_address, 'server') +
-      details_line(cgi, "Channel", status.irc_channel, 'channel') +
-      details_line(cgi, "Topic", status.irc_motd, 'motd') +
-      details_line(cgi, "Users online",
-                   if status.irc_player_list
-                     status.irc_player_list.join(', ')
-                   else
-                     "None"
-                   end, 'player_list')
+      details_line(cgi, "Server", "", 'server') +
+      details_line(cgi, "Channel", "", 'channel') +
+      details_line(cgi, "Topic", "", 'motd') +
+      details_line(cgi, "Users online", "None", 'player_list') +
+      details_line(cgi, "Last activity", "Unknown", 'last_activity')
+    end
+  end
+end
+
+def build_discord_section(cgi, status)
+  cgi.div('id' => 'discord-section',
+          'class' => 'section') do
+    details_section(cgi, "discord") do
+      details_line(cgi, "Topic", "", 'motd') +
+      details_line(cgi, "Users online", "", 'player_list') +
+      details_line(cgi, "Last activity", "Unknown", 'last_activity')
     end
   end
 end
@@ -296,6 +298,7 @@ sections[:sevendays] = "7 Days to Die"
 sections[:mumble] = "Mumble"
 sections[:civ] = "Civilization V"
 sections[:irc] = "IRC"
+sections[:discord] = "Discord"
 
 # Output the page
 output_html(sections)
