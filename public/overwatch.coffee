@@ -76,7 +76,13 @@ document.Overwatch =
             else if field == "motd"
               serverStatus[field] = URI.withinString serverStatus[field], (url) ->
                 return "<a href=\"#{url}\">#{url}</a>"
-            valueElem.innerHTML = serverStatus[field];
+            else if field == "last_actvity"
+              if serverStatus[field] == null
+                serverStatus[field] = "Unknown"
+              else
+                date = Date.new(serverStatus[field]*1000)
+                serverStatus[field] = date.toString()
+            valueElem.innerHTML = serverStatus[field]
 
 ###
 #  Once we know the document is complete, select the first tab,

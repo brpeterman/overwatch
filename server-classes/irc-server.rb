@@ -16,6 +16,7 @@ module Overwatch
     def initialize(config = nil, skip_query: nil)
       @status = {}
       @barriers = {}
+      @last_activity = nil
       @config = config["irc"]
       @nick = @config["nicks"].first
       @store = PStore.new 'irc_state.pstore'
@@ -95,6 +96,14 @@ module Overwatch
         if @config
           @config["channel"]
         end
+      end
+
+      define_info :last_activity do
+        @last_activity.to_i
+      end
+
+      define_info :server do
+        address
       end
     end
 
@@ -201,6 +210,10 @@ module Overwatch
         handle_privmsg event
       end
 
+      @bot.on :action do |event|
+        handle_action event
+      end
+
       @bot.handlers.each do |handler|
         handler.instance_eval do
           @execute_in_callback = false
@@ -226,6 +239,7 @@ module Overwatch
 
     def handle_privmsg(event)
       # Report the current civ turn if asked
+      @last_activity = Time.now
       if event.params.last == ".turn"
         dest = event.params.first
         if dest == @nick
@@ -235,6 +249,10 @@ module Overwatch
         report_turn(dest)
         report_needed(dest)
       end
+    end
+
+    def handle_action(event)
+      @last_activity = Time.now
     end
   end
 end

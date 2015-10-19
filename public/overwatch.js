@@ -62,7 +62,7 @@
     */
 
     updateStatus: function(e) {
-      var countElem, field, key, sectionElem, selector, serverStatus, status, statusElem, tabElem, valueElem, _results;
+      var countElem, date, field, key, sectionElem, selector, serverStatus, status, statusElem, tabElem, valueElem, _results;
       if (!(e.data != null)) {
         return;
       }
@@ -106,6 +106,13 @@
                   serverStatus[field] = URI.withinString(serverStatus[field], function(url) {
                     return "<a href=\"" + url + "\">" + url + "</a>";
                   });
+                } else if (field === "last_actvity") {
+                  if (serverStatus[field] === null) {
+                    serverStatus[field] = "Unknown";
+                  } else {
+                    date = Date["new"](serverStatus[field] * 1000);
+                    serverStatus[field] = date.toString();
+                  }
                 }
                 _results1.push(valueElem.innerHTML = serverStatus[field]);
               } else {
