@@ -93,12 +93,13 @@ module Overwatch
         config = JSON.load(File.open('config.json'))
         config.keys.reduce(list) do |acc, name|
           c = config[name]
+          reply_string = ""
           if name != 'discord'
             addr = c['serveraddr']
             if c['serverport']
               addr = "#{addr}:#{c['serverport']}"
             end
-            reply_string = "#{name}: #{addr}" if addr != ""
+            reply_string = "#{name}: #{addr}" if addr
           end
           acc << reply_string if reply_string != ""
         end
