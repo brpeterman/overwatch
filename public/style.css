@@ -31,7 +31,7 @@ iframe#map-frame {
 
 #tabs {
     min-width: 320px;
-    max-height: 100vh;
+    max-height: 50vh;
     overflow-y: auto;
 }
 
